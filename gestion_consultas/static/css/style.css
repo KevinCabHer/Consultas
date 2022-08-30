@@ -1,0 +1,161 @@
+:root {
+    --color-primary: rgb(0,0,85);
+    --color-text: #666;
+    --font-main: Roboto-bold;
+    --font-text: Roboto-regular;
+}
+
+* {
+    
+    margin: 0;
+    padding: 0;
+    box-sizing: 0;
+    font-family: var(--font-text);
+    color: var(--color-text);
+}
+
+h1,h2,h3,h4,h5{
+    font-family: var(--font-main); 
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 80px;
+    background-color: var(--color-primary);
+}
+
+nav ul{
+    list-style-type: none;
+    justify-content: left;
+    align-items: left;
+    display: flex;
+    width: 90vw;
+}
+
+nav ul li a{
+    text-decoration: none;
+    color: white;
+    text-transform: uppercase;
+    font-family: var(--font-main);
+    padding: 10px;
+}
+
+nav ul li a:hover {
+    color: var(--color-text)
+}
+
+nav img{
+
+    max-width: 80%;
+    max-height: 80%;
+
+}
+
+main{
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    margin: 50px;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+img {
+    
+       }
+.titulo{
+    display: inline-block;
+    
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-text);
+    list-style-type: none;
+    width: 50%;
+}
+
+.list li {
+    padding: 15px;
+    border-bottom: 1px solid var(--color-text);
+    width: 90%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn{
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+}
+
+.btn-detail{
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.btn-detail:hover{
+    background-color: white;
+    color: var(--color-primary);
+}
+
+.btn-edit{
+    background-color: #ffce00;
+    color: white;
+}
+.btn-edit:hover{
+    background-color:white;
+    color: #ffce00;
+}
+
+.btn-delete{
+    background-color: #ee1240;
+    color: white;
+}
+.btn-delete:hover{
+    background-color: white;
+    color: #ee1240;
+}
+
+.search{
+    margin: 20px;
+    width: 50%;
+}
+
+.search-bar{
+    padding: 5px;
+    width: 80%;
+
+}
+
+.search-btn{
+    width: 17%;
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.aux-btn{
+    width: 50%;
+    display: flex;
+    justify-content: flex-start;
+    margin: 10px;
+}
+
+.aux-btn a{
+    padding: 10px;
+}
+
+@font-face {
+    font-family: Roboto-bold;
+    src: url('../fonts/Roboto-Bold.ttf');
+}
+
+@font-face {
+    font-family: Roboto-regular;
+    src: url('../fonts/Roboto-Regular.ttf');
+}
