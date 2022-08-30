@@ -89,6 +89,15 @@ img {
 }
 
 .btn{
+    position: absolute;
+    display: flex;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+}
+.form1{
+    justify-content: center;
+    display: flex;
     padding: 5px 10px;
     text-align: center;
     text-decoration: none;

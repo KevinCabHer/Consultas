@@ -1,0 +1,52 @@
+{% extends 'layouts/base.html' %}
+
+{% block  'content' %}
+<div> 
+    <form action="/maquinas/" method="POST">
+        {% csrf_token %}
+        <div>
+            <select name="zona" id="zona">
+                {% for zona in zonas  %}
+                <option value="{{zona.devicezonename}}">{{zona.devicezonename}}</option>
+                {% endfor %}
+            </select>
+
+            <label for="fechainicial">Desde: </label>
+            <input name="fechainicial" id="fechainicial" autocomplete="off" type="date"></input>
+
+            <label for="fechafinal">Hasta: </label>
+            <input name="fechafinal" id="fechafinal" autocomplete="off" type="date" ></input>
+            
+            <button class = "btn btn-success" style="background-color:rgb(0,0,85)" >Buscar</button>
+        </div>
+    </form>
+</div>
+
+<hr/>
+    <div class = "container">
+        <div class = "row">
+            <div class = "cold-md-4.offset-md-4">
+                <div class = "tile">
+                    <div class = "tile-body">
+                        <div class = "table-resposive">
+                            <table class = "table table-hover table-bordered" id = "tablafacturas">
+                                <thead class = "table-dark " > 
+                                    <tr>
+                                        <th>Id Maquina</th>
+                                        <th>Total ventas</th>                                      
+                                    </tr>        
+                                </thead>
+                                <tbody>            
+                                    <tr>
+                                        <td>{{id_maquina}}</td>
+                                        <td>{{total}}</td>
+                                    </tr>                                          
+                                </tbody>            
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock  %}

@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from . import models
-import datetime 
+import datetime  
+
 
 import os
 from django.conf import settings
@@ -37,26 +38,54 @@ def ventas(request):
     gran_total = 0
     placas_total = 0
     
-    start_date = request.POST.get('fechainicial')
-    end_date = request.POST.get('fechafinal')
+    date_range = request.POST.get('fecha')
     
-    for dev in device:
-        #consulta ventas por id de maquina en un rango de fecha
-        query = models.TbBilling.objects.filter(id_device=dev, billingtransaciondate__range=(start_date, end_date)).only('billingtotal') 
-        cant[cont] = query.count() #cantidad de ventas por maquina
-        #total venta por id de 
-        for query in query:
-            total[cont] = query.billingtotal + total[cont]
-        
-        cont = cont + 1
-        
-    #total ventas    
-    for i in total:
-        gran_total = i + gran_total
-        
-    #total placas vendidas
-    for j in cant:
-        placas_total = j + placas_total
+    start_date = datetime.date.today()
+    end_date = datetime.date.today()
+    
+    if date_range == "hoy":
+        start_date = datetime.date.today()
+        end_date = datetime.date.today()+datetime.timedelta(days=1)
+        #print(start_date)
+        #print(end_date)
+    if date_range == "ayer":
+        start_date = datetime.date.today()-datetime.timedelta(days=1)
+        end_date = datetime.date.today()
+        #print(start_date)
+        #print(end_date)
+    if date_range == "semana":
+        start_date = datetime.date.today()-datetime.timedelta(days=7)
+        end_date = datetime.date.today()
+        #print(start_date)
+        #print(end_date)
+    if date_range == "mes":
+        start_date = datetime.date.today()-datetime.timedelta(days=7)
+        end_date = datetime.date.today()
+        #print(start_date)
+        #print(end_date) 
+    if date_range == "rango":
+        start_date = request.POST.get('fechainicial')
+        end_date = request.POST.get('fechafinal')
+    
+    
+    if date_range != "default":
+        for dev in device:
+            #consulta ventas por id de maquina en un rango de fecha        
+            query = models.TbBilling.objects.filter(id_device=dev, billingtransaciondate__range=(start_date, end_date)).select_related()
+            cant[cont] = query.count() #cantidad de ventas por maquina
+            #total venta por id de 
+            for query in query:
+                total[cont] = query.billingtotal + total[cont]
+            
+            cont = cont + 1
+            
+        #total ventas    
+        for i in total:
+            gran_total = i + gran_total
+            
+        #total placas vendidas
+        for j in cant:
+            placas_total = j + placas_total
         
     context = {
         'venta1':cant[0],
@@ -120,8 +149,7 @@ def ventas(request):
         'placas': placas_total,
         
     }
-    
-    
+    #return HttpResponse("prueba")
     return render(request, 'informes/ventas.html',context)
 
 def pdf(request):
@@ -135,4 +163,39 @@ def pdf(request):
        html, dest=response)
     
     return response
+
+def maquinas(request):
+    
+    total = 0
+   
+    start_date = request.POST.get('fechainicial')
+    end_date = request.POST.get('fechafinal')
+    
+    zonas = models.TbDevicezone.objects.all() #generar lista de zonas
+    select_zona = request.POST.get('zona') #selección del usuario
+    id_zona = models.TbDevicezone.objects.filter(devicezonename=select_zona).first() #consultar el id de la zona seleccionada
+    id_maquina = models.TbDevice.objects.filter(id_devizezone=(id_zona)).first() #buscar id de la maquina que corresponde
+    
+    #print("tipo dato: ")
+    #print(str(id_maquina))
+    #print("dato:")
+    #print(id_maquina)
+    #print("id maquina: "+(maquina)) 
+    
+    #busqueda de las ventas que coinciden con el id de la maquina y la fecha establecida
+    querys = models.TbBilling.objects.filter(id_device=id_maquina, billingtransaciondate__range=(start_date, end_date)).select_related()
+    #querys = []
+    for query in querys:
+        total = query.billingtotal + total
+    
+    print("valor recogido:", total)    
+    
+    context ={
+        'querys': querys,
+        'zonas':zonas,
+        'id_maquina':id_maquina,
+        'total':total
+    }
+    
+    return render(request, 'informes/maquinas.html', context)
     

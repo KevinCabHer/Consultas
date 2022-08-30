@@ -180,7 +180,7 @@ class TbDevice(models.Model):
     devicelastconnect = models.DateTimeField(db_column='DeviceLastConnect', blank=True, null=True)  # Field name made lowercase.
 
     def __str__(self):
-        return self.devicename
+        return str(self.id_device)
     
     class Meta:
         managed = False
@@ -204,7 +204,7 @@ class TbDevicezone(models.Model):
     devicezonename = models.CharField(db_column='DeviceZoneName', max_length=50, blank=True, null=True)  # Field name made lowercase.
 
     def __str__(self):
-        return self.devicezonename
+        return str(self.id_devicezone)
     
     class Meta:
         managed = False
