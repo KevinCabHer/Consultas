@@ -165,9 +165,13 @@ def pdf(request):
     return response
 
 def maquinas(request):
-    
+    lista_fechas = []
+    total_diario = []
+    stop = 0
+    cont = 0
     total = 0
-   
+    total_ = 0
+       
     start_date = request.POST.get('fechainicial')
     end_date = request.POST.get('fechafinal')
     
@@ -176,25 +180,46 @@ def maquinas(request):
     id_zona = models.TbDevicezone.objects.filter(devicezonename=select_zona).first() #consultar el id de la zona seleccionada
     id_maquina = models.TbDevice.objects.filter(id_devizezone=(id_zona)).first() #buscar id de la maquina que corresponde
     
-    #print("tipo dato: ")
-    #print(str(id_maquina))
-    #print("dato:")
-    #print(id_maquina)
-    #print("id maquina: "+(maquina)) 
-    
-    #busqueda de las ventas que coinciden con el id de la maquina y la fecha establecida
-    querys = models.TbBilling.objects.filter(id_device=id_maquina, billingtransaciondate__range=(start_date, end_date)).select_related()
-    #querys = []
-    for query in querys:
-        total = query.billingtotal + total
-    
-    print("valor recogido:", total)    
-    
+    if start_date != None and end_date != None:
+        start_date2 = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+        end_date2 = datetime.datetime.strptime(end_date, '%Y-%m-%d') + datetime.timedelta(days=1)
+        #busqueda de las ventas que coinciden con el id de la maquina y la fecha establecida
+        querys = models.TbBilling.objects.filter(id_device=id_maquina, billingtransaciondate__range=(start_date2, end_date2)).select_related()
+        #querys = []
+        for query in querys:
+            total = query.billingtotal + total
+        
+    #busqueda de las ventas diarias de la maquina
+    ##creacion fechas diarias
+    if start_date != None and end_date != None:
+        conv_fecha_ini = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+        conv_fecha_fin = datetime.datetime.strptime(end_date, '%Y-%m-%d') + datetime.timedelta(days=1)
+        
+        while(stop != 1):
+            
+            lista_fechas.append(conv_fecha_ini) 
+            conv_fecha_ini = conv_fecha_ini + datetime.timedelta(days=1)
+            
+            if conv_fecha_ini == conv_fecha_fin:
+                stop = 1
+                
+        for fechas in lista_fechas: 
+            
+            total_ = 0
+            fecha_end = fechas + datetime.timedelta(days=1)                   
+            query2 = models.TbBilling.objects.filter(id_device=id_maquina, billingtransaciondate__range=(fechas, fecha_end)).select_related()
+            
+            for query in query2:
+                total_ = query.billingtotal + total_
+                
+            total_diario.append(total_)
+            
     context ={
-        'querys': querys,
         'zonas':zonas,
         'id_maquina':id_maquina,
-        'total':total
+        'total':total,
+        'lista_fechas':lista_fechas,
+        'total_diario':total_diario,       
     }
     
     return render(request, 'informes/maquinas.html', context)

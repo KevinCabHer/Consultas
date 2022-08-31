@@ -43,6 +43,29 @@
         chart.draw(data, options);
       }
     </script>
+
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+
+        var data = google.visualization.arrayToDataTable([
+          ['Dia', 'Total'],
+          {% for total in total_diario  %}
+          ['Aug. 1, 2022,',      {{total}}],
+          {% endfor %}         
+        ]);
+
+        var options = {
+          title: ''
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('prueba'));
+
+        chart.draw(data, options);
+      }
+    </script>
     
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">

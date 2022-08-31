@@ -23,6 +23,8 @@
 </div>
 
 <hr/>
+<h2>Informe de ventas de la zona</h2>
+<hr/>
     <div class = "container">
         <div class = "row">
             <div class = "cold-md-4.offset-md-4">
@@ -49,4 +51,44 @@
             </div>
         </div>
     </div>
+
+    <hr/>
+    <h2>Informe Diario de ventas</h2>
+    <hr/>
+    <div class = "container">
+        <div class = "row">
+            <div class = "cold-md-4.offset-md-4">
+                <div class = "tile">
+                    <div class = "tile-body">
+                        <div class = "table-resposive">
+                            <table class = "table table-hover table-bordered" id = "tablafacturas">
+                                <thead class = "table-dark " > 
+                                    <tr>
+                                        {% for lista in lista_fechas %}
+                                        <td>{{lista}}</td>
+                                        {% endfor %}                                      
+                                    </tr>        
+                                </thead>
+                                <tbody>  
+                                    <tr>
+                                        {% for total in total_diario %}
+                                        <td>{{total}}</td>
+                                        {% endfor %}                                      
+                                    </tr>  
+                                     
+                                                                             
+                                </tbody>            
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr/>
+    <h2>Grafico de ventas de la Maquina # {{id_maquina}}</h2>
+<div>
+    <div id="prueba" style="width: 900px; height: 600px;"></div>
+</div>
+    
 {% endblock  %}
