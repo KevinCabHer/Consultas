@@ -1,5 +1,5 @@
 {% extends 'layouts/base.html' %}
-
+{% block 'title' %}MAQUINAS{% endblock  %}
 {% block  'content' %}
 <div> 
     <form action="/maquinas/" method="POST">
@@ -63,17 +63,21 @@
                             <table class = "table table-hover table-bordered" id = "tablafacturas">
                                 <thead class = "table-dark " > 
                                     <tr>
-                                        {% for lista in lista_fechas %}
-                                        <td>{{lista}}</td>
-                                        {% endfor %}                                      
+                                        <td>Fecha</td>
+                                        <td>Costo</td>                   
                                     </tr>        
                                 </thead>
-                                <tbody>  
+                                <tbody>
+                                    {% for key, value in contenedor.items %}  
                                     <tr>
-                                        {% for total in total_diario %}
-                                        <td>{{total}}</td>
-                                        {% endfor %}                                                                     
-                                    </tr>        
+                                        <td>{{ key }}</td>
+                                        <td>{{ value }}</td>                                                                    
+                                    </tr>
+                                    {% endfor %}   
+                                    <tr class = "table-dark ">
+                                        <td>Total</td>
+                                        <td>{{total1}}</td>
+                                    </tr>      
                                 </thead>          
                             </table>
                         </div>

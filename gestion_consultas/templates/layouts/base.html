@@ -52,8 +52,8 @@
 
         var data = google.visualization.arrayToDataTable([
           ['Dia', 'Total'],
-          {% for total in total_diario  %}
-          ['Aug. 1, 2022,',      {{total}}],
+          {% for key, value in contenedor2.items %}
+          ['{{ key }}',      {{ value }}], 
           {% endfor %}         
         ]);
 

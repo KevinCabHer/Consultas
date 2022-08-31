@@ -164,9 +164,12 @@ def pdf(request):
     
     return response
 
+
+
 def maquinas(request):
     lista_fechas = []
     total_diario = []
+    contenedor =[]
     stop = 0
     total = 0
     total_ = 0
@@ -215,13 +218,24 @@ def maquinas(request):
             total_diario.append(total_)
     total1 = sum(total_diario)
     print(total1)
+    
+    contenedor = {lista_fechas:total_diario for (lista_fechas,total_diario) in zip(lista_fechas,total_diario)}
+    
+    prueba = []
+    for element in lista_fechas:
+        prueba.append(str(element))
+        
+    contenedor2 = {prueba:total for (prueba,total) in zip(prueba,total_diario)}
         
     context ={
         'zonas':zonas,
         'id_maquina':id_maquina,
         'total':total,
         'lista_fechas':lista_fechas,
-        'total_diario':total_diario,       
+        'total_diario':total_diario, 
+        'contenedor': contenedor,
+        'contenedor2': contenedor2,
+        'total1' : total1     
     }
     
     return render(request, 'informes/maquinas.html', context)
