@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from . import models
 import datetime  
-#from datetime import datetime
+
 
 import os
 from django.conf import settings
@@ -168,27 +168,17 @@ def maquinas(request):
     lista_fechas = []
     total_diario = []
     stop = 0
-    cont = 0
     total = 0
-<<<<<<< HEAD
     total_ = 0
        
-=======
-    stop = 0
-    cont = 0
-    lista_fechas = []
-    total_diario = []
-   
->>>>>>> 9204662dd12a406e91b304aff18c21480f1931cb
     start_date = request.POST.get('fechainicial')
-    end_date = request.POST.get('fechafinal')      
+    end_date = request.POST.get('fechafinal')
     
     zonas = models.TbDevicezone.objects.all() #generar lista de zonas
     select_zona = request.POST.get('zona') #selección del usuario
     id_zona = models.TbDevicezone.objects.filter(devicezonename=select_zona).first() #consultar el id de la zona seleccionada
     id_maquina = models.TbDevice.objects.filter(id_devizezone=(id_zona)).first() #buscar id de la maquina que corresponde
     
-<<<<<<< HEAD
     if start_date != None and end_date != None:
         start_date2 = datetime.datetime.strptime(start_date, '%Y-%m-%d')
         end_date2 = datetime.datetime.strptime(end_date, '%Y-%m-%d') + datetime.timedelta(days=1)
@@ -200,17 +190,8 @@ def maquinas(request):
         
     #busqueda de las ventas diarias de la maquina
     ##creacion fechas diarias
-=======
-    #busqueda de las ventas que coinciden con el id de la maquina y la fecha establecida
-    querys = models.TbBilling.objects.filter(id_device=id_maquina, billingtransaciondate__range=(start_date, end_date)).select_related()
-    #recorrer la busqueda sumando las ventas
-    for query in querys:
-        total = query.billingtotal + total
-        
-    #busqueda de las ventas diarias de la maquina
-     ##creacion fechas diarias
->>>>>>> 9204662dd12a406e91b304aff18c21480f1931cb
     if start_date != None and end_date != None:
+        
         conv_fecha_ini = datetime.datetime.strptime(start_date, '%Y-%m-%d')
         conv_fecha_fin = datetime.datetime.strptime(end_date, '%Y-%m-%d') + datetime.timedelta(days=1)
         
@@ -222,7 +203,6 @@ def maquinas(request):
             if conv_fecha_ini == conv_fecha_fin:
                 stop = 1
                 
-<<<<<<< HEAD
         for fechas in lista_fechas: 
             
             total_ = 0
@@ -233,30 +213,15 @@ def maquinas(request):
                 total_ = query.billingtotal + total_
                 
             total_diario.append(total_)
-            
-=======
-        for fecha in lista_fechas:
-            #consulta ventas por id de maquina en un rango de fecha        
-            start_date = fecha
-            end_date = fecha + datetime.timedelta(days=1)
-            
-            total_d = models.TbBilling.objects.filter(id_device=id_maquina, billingtransaciondate__range=(start_date, end_date)).select_related()
-            for total in total_d: 
-                pass
-                #total_diario[cont] = total_d.billingtotal
-            #cont = cont + 1
-    
->>>>>>> 9204662dd12a406e91b304aff18c21480f1931cb
+    total1 = sum(total_diario)
+    print(total1)
+        
     context ={
         'zonas':zonas,
         'id_maquina':id_maquina,
         'total':total,
         'lista_fechas':lista_fechas,
-<<<<<<< HEAD
         'total_diario':total_diario,       
-=======
-        'total_diario':total_diario
->>>>>>> 9204662dd12a406e91b304aff18c21480f1931cb
     }
     
     return render(request, 'informes/maquinas.html', context)
