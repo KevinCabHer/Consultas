@@ -1,3 +1,4 @@
+from calendar import c
 from django.shortcuts import render
 from django.http import HttpResponse
 from . import models
@@ -221,6 +222,7 @@ def maquinas(request):
                 total_ = query.billingtotal + total_
                 
             total_diario.append(total_)
+            
     total1 = sum(total_diario)
     print(total1)
     
@@ -259,28 +261,68 @@ def pdf2(request):
     return response
 
 def comparacion(request):
+    total_device = []
+    device_ventas = {}
+    device_new = []
+    device_str = []
+    lista_fechas = []
+    stop = 0
     
-    start_date1 = request.POST.get('pet01')
-    start_date2 = request.POST.get('pet02')
-    start_date3 = request.POST.get('pet03')
-    start_date4 = request.POST.get('pet04')
-    start_date5 = request.POST.get('pet05')
-    start_date6 = request.POST.get('pet06')
-    start_date7 = request.POST.get('pet07')
-    start_date8 = request.POST.get('pet08')
-    start_date9 = request.POST.get('pet09')
+    start_date = request.POST.get('fechainicial')
+    end_date = request.POST.get('fechafinal')    
+    
+    device = [
+        request.POST.get('pet01'),
+        request.POST.get('pet02'),
+        request.POST.get('pet03'),
+        request.POST.get('pet04'),
+        request.POST.get('pet05'),
+        request.POST.get('pet06'),
+        request.POST.get('pet07'),
+        request.POST.get('pet08'),
+        request.POST.get('pet09'),
+    ]      
+    # Tomar los valores de la lista diferentes de None - generar lista con los nombres de la maquinas
+    for dev in device:
+        if dev is not None:
+            device_new.append(int(dev))
+            device_str.append("PET0"+dev)
+                     
+    if start_date != None and end_date != None: #Siempre y cuando halla valores seleccionados
+        
+        #conversion fechas para poder trabajar operaciones
+        start_date2 = datetime.datetime.strptime(start_date, '%Y-%m-%d') 
+        end_date2 = datetime.datetime.strptime(end_date, '%Y-%m-%d') + datetime.timedelta(days=1)
+        
+        #Total de ventas por maquina y rango de fecha
+        for dev in device_new:
+            total_ = 0
+            querys = models.TbBilling.objects.filter(id_device=dev, billingtransaciondate__range=(start_date2, end_date2)).select_related()
+            for query in querys:
+                total_ = query.billingtotal + total_
+            total_device.append(total_)
+        
+        device_ventas = {device_str:total_device for (device_str,total_device) in zip(device_str,total_device)}
 
-    print(start_date1)
-    print(start_date2)
-    print(start_date3)
-    print(start_date4)
-    print(start_date5)
-    print(start_date6)
-    print(start_date7)
-    print(start_date8)
-    print(start_date9)
-
-
-    context={}
+        #Total de ventas por maquina y dia
+        
+        #conv_fecha_ini = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+        #conv_fecha_fin = datetime.datetime.strptime(end_date, '%Y-%m-%d') + datetime.timedelta(days=1)
+        
+        while(stop != 1):
+            
+            lista_fechas.append(start_date2) 
+            start_date2 = start_date2 + datetime.timedelta(days=1)
+            
+            if start_date2 == end_date2:
+                stop = 1
+        
+        context={
+            'device_ventas':device_ventas, 
+            'fecha_ini':start_date,
+            'fecha_fin':end_date
+        }
+    else:
+        context = {}
     return render(request, 'informes/comparacion.html', context)
     

@@ -15,60 +15,58 @@
             
             <button class = "btn btn-success" style="background-color:rgb(0,0,85)" >Buscar</button>
         <hr/>
+        <div class = "grid"> 
+            <div class = "a">
+                <input type="radio" id="pet01" name="pet01" value="1">
+                <label for="pet01">PET01</label>
+            </div>
 
-        <div>
-            <input type="radio" id="pet01" name="pet01" value="pet01">
-            <label for="pet01">PET01</label>
-        </div>
+            <div class = "b">
+                <input type="radio" id="pet02" name="pet02" value="2">
+                <label for="pet02">PET02</label>
+            </div>
 
-        <div>
-            <input type="radio" id="pet02" name="pet02" value="pet02">
-            <label for="pet02">PET02</label>
-        </div>
+            <div class = "c">
+                <input type="radio" id="pet03" name="pet03" value="3">
+                <label for="pet03">PET03</label>
+            </div>
 
-        <div>
-            <input type="radio" id="pet03" name="pet03" value="pet03">
-            <label for="pet03">PET03</label>
-        </div>
+            <div class = "d">
+                <input type="radio" id="pet04" name="pet04" value="4">
+                <label for="pet04">PET04</label>
+            </div>
 
-        <div>
-            <input type="radio" id="pet04" name="pet04" value="pet04">
-            <label for="pet04">PET04</label>
-        </div>
+            <div class = "e">
+                <input type="radio" id="pet05" name="pet05" value="5">
+                <label for="pet05">PET05</label>
+            </div>
 
-        <div>
-            <input type="radio" id="pet05" name="pet05" value="pet05">
-            <label for="pet05">PET05</label>
-        </div>
+            <div class = "f">
+                <input type="radio" id="pet06" name="pet06" value="6">
+                <label for="pet06">PET06</label>
+            </div>
 
-        <div>
-            <input type="radio" id="pet06" name="pet06" value="pet06">
-            <label for="pet06">PET06</label>
-        </div>
+            <div class = "g">
+                <input type="radio" id="pet07" name="pet07" value="7">
+                <label for="pet07">PET07</label>
+            </div>
 
-        <div>
-            <input type="radio" id="pet07" name="pet07" value="pet07">
-            <label for="pet07">PET07</label>
-        </div>
+            <div class = "h">
+                <input type="radio" id="pet08" name="pet08" value="8">
+                <label for="pet08">PET08</label>
+            </div>
 
-        <div>
-            <input type="radio" id="pet08" name="pet08" value="pet08">
-            <label for="pet08">PET08</label>
-        </div>
-
-        <div>
-            <input type="radio" id="pet09" name="pet09" value="pet09">
-            <label for="pet09">PET09</label>
-        </div>
-
-        <div>
+            <div class = "i">
+                <input type="radio" id="pet09" name="pet09" value="9">
+                <label for="pet09">PET09</label>
+            </div>
         </div>
     </form>
+<hr/>
+<h2>Informe de ventas por maquina</h2>
+<h3>Desde: {{fecha_ini}}  Hasta: {{fecha_fin}}
+<hr/>
 </fieldset>
-
-<hr/>
-<h2>Informe de ventas de la zona</h2>
-<hr/>
     <div class = "container">
         <div class = "row">
             <div class = "cold-md-4.offset-md-4">
@@ -79,14 +77,17 @@
                                 <thead class = "table-dark " > 
                                     <tr>
                                         <th>Id Maquina</th>
-                                        <th>Total ventas</th>                                      
+                                        <th>Total venta</th>                                      
                                     </tr>        
                                 </thead>
                                 <tbody>            
+                                    {% for key, value in device_ventas.items %}  
                                     <tr>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>                                          
+                                        <td>{{ key }}</td>
+                                        <td>{{ value }}</td>                                                                    
+                                    </tr>
+                                    {% endfor %} 
+                                                                             
                                 </tbody>            
                             </table>
                         </div>
@@ -96,4 +97,6 @@
         </div>
     </div>
 <hr/>
+
+
 {% endblock  %}
