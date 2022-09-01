@@ -8,11 +8,18 @@ import os
 from django.conf import settings
 from django.http import HttpResponse
 from django.template.loader import get_template
+from django.template.loader import render_to_string
+import pdfkit
+from jinja2 import Environment, FileSystemLoader 
+
+path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
 from xhtml2pdf import pisa
 from django.contrib.staticfiles import finders
 
 
-
+context1 = {}
+context2 = {}
 
 def informes(request):
     tabla = models.TbProduct.objects.select_related().all()
@@ -86,8 +93,8 @@ def ventas(request):
         #total placas vendidas
         for j in cant:
             placas_total = j + placas_total
-        
-    context = {
+    global context1   
+    context1 = {
         'venta1':cant[0],
         'total1':total[0],
 
@@ -150,12 +157,12 @@ def ventas(request):
         
     }
     #return HttpResponse("prueba")
-    return render(request, 'informes/ventas.html',context)
+    return render(request, 'informes/ventas.html',context1)
 
 def pdf(request):
     template = get_template('informes/ventas.html')
-    context = {'title':''}
-    html = template.render(context)
+    #context = {'title':''}
+    html = template.render(context1)
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="reporte_ventas.pdf"'
     
@@ -163,8 +170,6 @@ def pdf(request):
        html, dest=response)
     
     return response
-
-
 
 def maquinas(request):
     lista_fechas = []
@@ -226,8 +231,9 @@ def maquinas(request):
         prueba.append(str(element))
         
     contenedor2 = {prueba:total for (prueba,total) in zip(prueba,total_diario)}
-        
-    context ={
+    
+    global context2    
+    context2 ={
         'zonas':zonas,
         'id_maquina':id_maquina,
         'total':total,
@@ -238,5 +244,43 @@ def maquinas(request):
         'total1' : total1     
     }
     
-    return render(request, 'informes/maquinas.html', context)
+    return render(request, 'informes/maquinas.html', context2)
+
+def pdf2(request):
+    template = get_template('informes/maquinas.html')
+    #context = {'title':''}
+    html = template.render(context2)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reporte_maquinas.pdf"'
+    
+    pisa_status = pisa.CreatePDF(
+       html, dest=response)
+    
+    return response
+
+def comparacion(request):
+    
+    start_date1 = request.POST.get('pet01')
+    start_date2 = request.POST.get('pet02')
+    start_date3 = request.POST.get('pet03')
+    start_date4 = request.POST.get('pet04')
+    start_date5 = request.POST.get('pet05')
+    start_date6 = request.POST.get('pet06')
+    start_date7 = request.POST.get('pet07')
+    start_date8 = request.POST.get('pet08')
+    start_date9 = request.POST.get('pet09')
+
+    print(start_date1)
+    print(start_date2)
+    print(start_date3)
+    print(start_date4)
+    print(start_date5)
+    print(start_date6)
+    print(start_date7)
+    print(start_date8)
+    print(start_date9)
+
+
+    context={}
+    return render(request, 'informes/comparacion.html', context)
     

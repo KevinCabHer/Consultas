@@ -1,5 +1,5 @@
 {% extends 'layouts/base.html' %}
-{% block 'title' %}MAQUINAS{% endblock  %}
+{% block 'title' %}Maquinas{% endblock  %}
 {% block  'content' %}
 <div> 
     <form action="/maquinas/" method="POST">
@@ -21,6 +21,11 @@
         </div>
     </form>
 </div>
+<hr/>
+<form class= "form1" action="/pdf2/" method="POST">
+    {% csrf_token %}
+    <button class = "btn btn-success" style="background-color:rgb(0,0,85)"> Generar PDF </button>
+</form>
 <hr/>
 <h2>Informe de ventas de la zona</h2>
 <hr/>

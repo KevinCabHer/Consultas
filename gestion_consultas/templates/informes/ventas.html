@@ -1,5 +1,5 @@
 {% extends 'layouts/base.html' %}
-
+{% block 'title' %}Ventas{% endblock  %}
 {% block 'content' %}
 
 <h2>Reporte de ventas por Zona</h2>
@@ -26,10 +26,12 @@
             <button class = "btn btn-success" style="background-color:rgb(0,0,85)" >Filtrar</button>
         </div>
     </form>
+    <hr/>
     <form class= "form1" action="/pdf/" method="POST">
         {% csrf_token %}
         <button class = "btn btn-success" style="background-color:rgb(0,0,85)"> Generar PDF </button>
     </form>
+    <hr/>
 </div>
 <hr/>
 <div class = "container">
