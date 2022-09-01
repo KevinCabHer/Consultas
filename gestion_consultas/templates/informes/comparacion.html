@@ -15,48 +15,48 @@
             
             <button class = "btn btn-success" style="background-color:rgb(0,0,85)" >Buscar</button>
         <hr/>
-        <div class = "grid"> 
-            <div class = "a">
+        <div> 
+            <div>
                 <input type="radio" id="pet01" name="pet01" value="1">
                 <label for="pet01">PET01</label>
             </div>
 
-            <div class = "b">
+            <div>
                 <input type="radio" id="pet02" name="pet02" value="2">
                 <label for="pet02">PET02</label>
             </div>
 
-            <div class = "c">
+            <div>
                 <input type="radio" id="pet03" name="pet03" value="3">
                 <label for="pet03">PET03</label>
             </div>
 
-            <div class = "d">
+            <div>
                 <input type="radio" id="pet04" name="pet04" value="4">
                 <label for="pet04">PET04</label>
             </div>
 
-            <div class = "e">
+            <div>
                 <input type="radio" id="pet05" name="pet05" value="5">
                 <label for="pet05">PET05</label>
             </div>
 
-            <div class = "f">
+            <div>
                 <input type="radio" id="pet06" name="pet06" value="6">
                 <label for="pet06">PET06</label>
             </div>
 
-            <div class = "g">
+            <div>
                 <input type="radio" id="pet07" name="pet07" value="7">
                 <label for="pet07">PET07</label>
             </div>
 
-            <div class = "h">
+            <div>
                 <input type="radio" id="pet08" name="pet08" value="8">
                 <label for="pet08">PET08</label>
             </div>
 
-            <div class = "i">
+            <div>
                 <input type="radio" id="pet09" name="pet09" value="9">
                 <label for="pet09">PET09</label>
             </div>
@@ -64,9 +64,11 @@
     </form>
 <hr/>
 <h2>Informe de ventas por maquina</h2>
-<h3>Desde: {{fecha_ini}}  Hasta: {{fecha_fin}}
+<h4>Desde: {{fecha_ini}}  Hasta: {{fecha_fin}}</h4>
 <hr/>
 </fieldset>
+
+
     <div class = "container">
         <div class = "row">
             <div class = "cold-md-4.offset-md-4">
@@ -97,6 +99,47 @@
         </div>
     </div>
 <hr/>
+<h2>Informe de ventas diario por maquina </h2>
+<hr/>
+<div class = "container">
+    <div class = "row">
+        <div class = "cold-md-4.offset-md-4">
+            <div class = "tile">
+                <div class = "tile-body">
+                    <div class = "table-resposive">
+                        <table class = "table table-hover table-bordered" id = "tablafacturas">
+                            <thead class = "table-dark " > 
+                                <tr>
+                                    <th></th>
+                                    {% for dev in device %}
+                                    <th>{{ dev }}</th> 
+                                    {% endfor %}
+                                                                         
+                                </tr>        
+                            </thead>
+                            <tbody>            
+                                {% for key, value in diccionario.items %}  
+                                <tr>
+                                    <td>{{ key }}</td>
+                                    {% for val in value  %}
+                                    <td>{{ val }}</td> 
+                                    {% endfor %}                                                                   
+                                </tr>
+                                {% endfor %}  
+                                <tr class = "table-dark" style = "color:white;">
+                                    <td>Total</td>
+                                    {% for key, value in device_ventas.items  %}
+                                    <td>{{value}}</td>
+                                    {% endfor %}
+                                </tr>                                                  
+                            </tbody>            
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 {% endblock  %}

@@ -2,7 +2,9 @@ from calendar import c
 from django.shortcuts import render
 from django.http import HttpResponse
 from . import models
-import datetime  
+import datetime 
+import pandas as pd 
+import numpy as np
 
 
 import os
@@ -266,6 +268,8 @@ def comparacion(request):
     device_new = []
     device_str = []
     lista_fechas = []
+    total_diario_maquina = []
+    total_diario_maquinas = []
     stop = 0
     
     start_date = request.POST.get('fechainicial')
@@ -306,9 +310,6 @@ def comparacion(request):
 
         #Total de ventas por maquina y dia
         
-        #conv_fecha_ini = datetime.datetime.strptime(start_date, '%Y-%m-%d')
-        #conv_fecha_fin = datetime.datetime.strptime(end_date, '%Y-%m-%d') + datetime.timedelta(days=1)
-        
         while(stop != 1):
             
             lista_fechas.append(start_date2) 
@@ -316,11 +317,37 @@ def comparacion(request):
             
             if start_date2 == end_date2:
                 stop = 1
+
+        for dev in device_new: #recorro las maquinas
+            total_diario_maquina = []
+            #print(dev)
+            for fecha_i in lista_fechas:# busqueda diaria por maquina
+                fecha_f = fecha_i + datetime.timedelta(days=1)
+                querys = models.TbBilling.objects.filter(id_device=dev, billingtransaciondate__range=(fecha_i, fecha_f)).select_related()
+                subtotal_device = 0
+                #print(fecha_i)
+                for query in querys:# sumatoria del total de la venta en ese dia
+                    subtotal_device = query.billingtotal + subtotal_device
+                total_diario_maquina.append(subtotal_device) #lista con las ventas diarias de la maquina
+            #print(len(total_diario_maquina))
+            print(sum(total_diario_maquina))
+            total_diario_maquinas.append(total_diario_maquina) #lista de listas con las ventas diarias de todas las maquinas
         
+        
+        total_diario_maquinas = np.array(total_diario_maquinas)
+        total_diario_maquinas = total_diario_maquinas.transpose()
+        print(total_diario_maquinas)
+        #print(total_diario_maquinas)    
+        dic_device_ventas = {lista_fechas:total_diario_maquinas for (lista_fechas,total_diario_maquinas) in zip(lista_fechas,total_diario_maquinas)}     
+        #print(dic_device_ventas)
+    
         context={
             'device_ventas':device_ventas, 
             'fecha_ini':start_date,
-            'fecha_fin':end_date
+            'fecha_fin':end_date,
+            'fechas':lista_fechas,
+            'diccionario': dic_device_ventas,
+            'device': device_str
         }
     else:
         context = {}

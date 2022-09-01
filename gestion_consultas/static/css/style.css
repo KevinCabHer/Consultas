@@ -63,24 +63,7 @@ main{
     align-items: center;
 }
 
-.grid{
-    display:grid;
-    grid-template-areas: "pet01 pet06"
-                         "pet02 pet07"
-                         "pet03 pet08"
-                         "pet04 pet09"
-                         "pet05 ";
-}
 
-.a { grid-area:pet01;}
-.b { grid-area:pet02;}
-.c { grid-area:pet03;}
-.d { grid-area:pet04;}
-.e { grid-area:pet05;}
-.f { grid-area:pet06;}
-.g { grid-area:pet07;}
-.h { grid-area:pet08;}
-.i { grid-area:pet09;}
 
 .titulo{
     display: inline-block;
