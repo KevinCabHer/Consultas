@@ -66,6 +66,33 @@
         chart.draw(data, options);
       }
     </script>
+
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+
+        var data = google.visualization.arrayToDataTable([
+        
+          ['Dia', 'Total'],
+          {% for key, value in diccionario2.items %}
+          ['{{ key }}',     {% for val1 in value %} {{ val1 }}, {% endfor %} ], 
+          {% endfor %}         
+        ]);
+
+        var options = {
+          title: ''
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('prueba2'));
+
+        chart.draw(data, options);
+      }
+    </script>
+
+    
+    
     
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">

@@ -264,6 +264,8 @@ def pdf2(request):
 
 def comparacion(request):
     total_device = []
+    total_int = []
+    total_int_ = []
     device_ventas = {}
     device_new = []
     device_str = []
@@ -320,6 +322,7 @@ def comparacion(request):
 
         for dev in device_new: #recorro las maquinas
             total_diario_maquina = []
+            total_int = []
             #print(dev)
             for fecha_i in lista_fechas:# busqueda diaria por maquina
                 fecha_f = fecha_i + datetime.timedelta(days=1)
@@ -329,25 +332,41 @@ def comparacion(request):
                 for query in querys:# sumatoria del total de la venta en ese dia
                     subtotal_device = query.billingtotal + subtotal_device
                 total_diario_maquina.append(subtotal_device) #lista con las ventas diarias de la maquina
+                total_int.append(int(subtotal_device))
             #print(len(total_diario_maquina))
-            print(sum(total_diario_maquina))
+            #print(sum(total_diario_maquina))
+            total_int_.append(total_int)
             total_diario_maquinas.append(total_diario_maquina) #lista de listas con las ventas diarias de todas las maquinas
-        
+        print(total_int_)
         
         total_diario_maquinas = np.array(total_diario_maquinas)
         total_diario_maquinas = total_diario_maquinas.transpose()
-        print(total_diario_maquinas)
+        
+        total_int_ = np.array(total_int_)
+        total_int_ = total_int_.transpose()
+
+        #print(total_int_)
+        
         #print(total_diario_maquinas)    
         dic_device_ventas = {lista_fechas:total_diario_maquinas for (lista_fechas,total_diario_maquinas) in zip(lista_fechas,total_diario_maquinas)}     
         #print(dic_device_ventas)
-    
+        prueba = []
+        
+        for element in lista_fechas:
+            prueba.append(str(element))
+        diccionario2 = {prueba:total for (prueba,total) in zip(prueba,total_int_)}
+        
+        print(diccionario2)
+        
         context={
             'device_ventas':device_ventas, 
             'fecha_ini':start_date,
             'fecha_fin':end_date,
             'fechas':lista_fechas,
             'diccionario': dic_device_ventas,
-            'device': device_str
+            'device': device_str,
+            'diccionario2': diccionario2,
+            'valor_grafica': total_int_
         }
     else:
         context = {}
