@@ -1,12 +1,10 @@
-from calendar import c
+from calendar import c, month
 from django.shortcuts import render
 from django.http import HttpResponse
 from . import models
 import datetime 
 import pandas as pd 
 import numpy as np
-
-
 import os
 from django.conf import settings
 from django.http import HttpResponse
@@ -20,7 +18,6 @@ config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
 from xhtml2pdf import pisa
 from django.contrib.staticfiles import finders
 
-
 context1 = {}
 context2 = {}
 
@@ -30,55 +27,46 @@ def informes(request):
     return render(request, 'informes/index.html',context)
     
 def inicio(request):
-    #tabla = models.TbProduct.objects.all()
-    #context = {'tabla' : tabla}   
     return render(request, 'informes/inicio.html',{})
 
-def about(request):
-    #tabla = models.TbProduct.objects.all()
-    #context = {'tabla' : tabla}   
+def about(request):   
     return render(request, 'informes/about.html',{})
 
 def ventas(request):
-    
-    total  =    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-    cant   =    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-    device =    ['1','2','3','4','5','6','7','8','9','10','11','17','18','19','20','21','22','23','24']#id maquinas
+    total  =    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] #esto se puede mejorar
+    cant   =    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]  #esto se puede mejorar
+    device =    ['1','2','3','4','5','6','7','8','9','10','11','17','18','19','20','21','22','23','24']#id maquinas  #esto se puede mejorar
     cont   = 0
     gran_total = 0
     placas_total = 0
     
-    date_range = request.POST.get('fecha')
-    
-    start_date = datetime.date.today()
-    end_date = datetime.date.today()
-    
-    if date_range == "hoy":
+    date_range = request.POST.get('fecha')    
+    #esto se puede mejorar
+    if date_range != None:
+        
         start_date = datetime.date.today()
-        end_date = datetime.date.today()+datetime.timedelta(days=1)
-        #print(start_date)
-        #print(end_date)
-    if date_range == "ayer":
-        start_date = datetime.date.today()-datetime.timedelta(days=1)
         end_date = datetime.date.today()
-        #print(start_date)
-        #print(end_date)
-    if date_range == "semana":
-        start_date = datetime.date.today()-datetime.timedelta(days=7)
-        end_date = datetime.date.today()
-        #print(start_date)
-        #print(end_date)
-    if date_range == "mes":
-        start_date = datetime.date.today()-datetime.timedelta(days=7)
-        end_date = datetime.date.today()
-        #print(start_date)
-        #print(end_date) 
-    if date_range == "rango":
-        start_date = request.POST.get('fechainicial')
-        end_date = request.POST.get('fechafinal')
-    
-    
-    if date_range != "default":
+        
+        if date_range == "hoy":
+            start_date = datetime.date.today()
+            end_date = datetime.date.today()+datetime.timedelta(days=1)
+
+        if date_range == "ayer":
+            start_date = datetime.date.today()-datetime.timedelta(days=1)
+            end_date = datetime.date.today()
+
+        if date_range == "semana":
+            start_date = datetime.date.today()-datetime.timedelta(days=7)
+            end_date = datetime.date.today()
+            
+        if date_range == "mes":
+            start_date = datetime.date.today()-datetime.timedelta(days=7)
+            end_date = datetime.date.today()
+            
+        if date_range == "rango":
+            start_date = request.POST.get('fechainicial')
+            end_date = request.POST.get('fechafinal')
+        
         for dev in device:
             #consulta ventas por id de maquina en un rango de fecha        
             query = models.TbBilling.objects.filter(id_device=dev, billingtransaciondate__range=(start_date, end_date)).select_related()
@@ -88,15 +76,16 @@ def ventas(request):
                 total[cont] = query.billingtotal + total[cont]
             
             cont = cont + 1
-            
-        #total ventas    
+        # total dinero 
         for i in total:
             gran_total = i + gran_total
             
         #total placas vendidas
         for j in cant:
             placas_total = j + placas_total
-    global context1   
+            
+    global context1  #variable global para generar pdf
+      
     context1 = {
         'venta1':cant[0],
         'total1':total[0],
@@ -190,7 +179,7 @@ def maquinas(request):
     id_zona = models.TbDevicezone.objects.filter(devicezonename=select_zona).first() #consultar el id de la zona seleccionada
     id_maquina = models.TbDevice.objects.filter(id_devizezone=(id_zona)).first() #buscar id de la maquina que corresponde
     
-    if start_date != None and end_date != None:
+    if start_date != None and end_date != None and select_zona != None:
         start_date2 = datetime.datetime.strptime(start_date, '%Y-%m-%d')
         end_date2 = datetime.datetime.strptime(end_date, '%Y-%m-%d') + datetime.timedelta(days=1)
         #busqueda de las ventas que coinciden con el id de la maquina y la fecha establecida
@@ -201,7 +190,7 @@ def maquinas(request):
         
     #busqueda de las ventas diarias de la maquina
     ##creacion fechas diarias
-    if start_date != None and end_date != None:
+    #if start_date != None and end_date != None:
         
         conv_fecha_ini = datetime.datetime.strptime(start_date, '%Y-%m-%d')
         conv_fecha_fin = datetime.datetime.strptime(end_date, '%Y-%m-%d') + datetime.timedelta(days=1)
@@ -225,30 +214,32 @@ def maquinas(request):
                 
             total_diario.append(total_)
             
-    total1 = sum(total_diario)
-    print(total1)
-    
-    contenedor = {lista_fechas:total_diario for (lista_fechas,total_diario) in zip(lista_fechas,total_diario)}
-    
-    prueba = []
-    for element in lista_fechas:
-        prueba.append(str(element))
+        total1 = sum(total_diario)
+        print(total1)
         
-    contenedor2 = {prueba:total for (prueba,total) in zip(prueba,total_diario)}
-    
-    global context2    
-    context2 ={
-        'zonas':zonas,
-        'id_maquina':id_maquina,
-        'total':total,
-        'lista_fechas':lista_fechas,
-        'total_diario':total_diario, 
-        'contenedor': contenedor,
-        'contenedor2': contenedor2,
-        'total1' : total1     
-    }
-    
-    return render(request, 'informes/maquinas.html', context2)
+        contenedor = {lista_fechas:total_diario for (lista_fechas,total_diario) in zip(lista_fechas,total_diario)}
+        
+        prueba = []
+        for element in lista_fechas:
+            prueba.append(str(element))
+            
+        contenedor2 = {prueba:total for (prueba,total) in zip(prueba,total_diario)}
+        
+        global context2    
+        context2 ={
+            'zonas':zonas,
+            'id_maquina':id_maquina,
+            'total':total,
+            'lista_fechas':lista_fechas,
+            'total_diario':total_diario, 
+            'contenedor': contenedor,
+            'contenedor2': contenedor2,
+            'total1' : total1     
+        }
+        
+        return render(request, 'informes/maquinas.html', context2)
+    else:
+        return render(request, 'informes/maquinas.html', {'zonas':zonas,})
 
 def pdf2(request):
     template = get_template('informes/maquinas.html')
@@ -275,9 +266,17 @@ def comparacion(request):
     stop = 0
     
     start_date = request.POST.get('fechainicial')
-    end_date = request.POST.get('fechafinal')    
+    end_date = request.POST.get('fechafinal')  
     
-    device = [
+    check_box = request.POST.get('seleccion_rango')  
+    semana = request.POST.get('semana')
+    
+    mes = request.POST.get('mes')  
+    
+    #print(check_box)
+    #print(semana)
+    
+    device = [ 
         request.POST.get('pet01'),
         request.POST.get('pet02'),
         request.POST.get('pet03'),
@@ -295,10 +294,32 @@ def comparacion(request):
             device_str.append("PET0"+dev)
                      
     if start_date != None and end_date != None: #Siempre y cuando halla valores seleccionados
-        
+              
+        if check_box == "1": #opcion semanas
+            pass
+        if check_box == "2": #opcion meses
+            control = 0
+            mes = mes + "-01" # fecha 01 del mes
+            start_date2 = datetime.datetime.strptime(mes, '%Y-%m-%d') #fecha inicial
+            mes = start_date2.month #mes en el que estoy
+            copia = start_date2 #fecha final inicia en fecha inicial
+            mes2 = copia.month #mes 2 inicia en el mes en el que estoy
+            
+            while(control == 0): #itero el mes hasta el ultimo dia del mismo      
+                copia = copia + datetime.timedelta(days=1)
+                mes2 = copia.month
+                if mes == mes2:
+                    end_date2 = copia
+                else:
+                    control = 1
+    
+        if check_box == "3": #opcion rango fechas
+            start_date2 = datetime.datetime.strptime(start_date, '%Y-%m-%d') 
+            end_date2 = datetime.datetime.strptime(end_date, '%Y-%m-%d') + datetime.timedelta(days=1)
+        fecha_ini = start_date2
+        fecha_fin = end_date2    
         #conversion fechas para poder trabajar operaciones
-        start_date2 = datetime.datetime.strptime(start_date, '%Y-%m-%d') 
-        end_date2 = datetime.datetime.strptime(end_date, '%Y-%m-%d') + datetime.timedelta(days=1)
+        
         
         #Total de ventas por maquina y rango de fecha
         for dev in device_new:
@@ -312,6 +333,7 @@ def comparacion(request):
 
         #Total de ventas por maquina y dia
         
+        #generar lista con las fecchas segun rango seleccionado
         while(stop != 1):
             
             lista_fechas.append(start_date2) 
@@ -337,7 +359,7 @@ def comparacion(request):
             #print(sum(total_diario_maquina))
             total_int_.append(total_int)
             total_diario_maquinas.append(total_diario_maquina) #lista de listas con las ventas diarias de todas las maquinas
-        print(total_int_)
+        #print(total_int_)
         
         total_diario_maquinas = np.array(total_diario_maquinas)
         total_diario_maquinas = total_diario_maquinas.transpose()
@@ -356,12 +378,12 @@ def comparacion(request):
             prueba.append(str(element))
         diccionario2 = {prueba:total for (prueba,total) in zip(prueba,total_int_)}
         
-        print(diccionario2)
+        #print(diccionario2)
         
         context={
             'device_ventas':device_ventas, 
-            'fecha_ini':start_date,
-            'fecha_fin':end_date,
+            'fecha_ini':fecha_ini,
+            'fecha_fin':fecha_fin,
             'fechas':lista_fechas,
             'diccionario': dic_device_ventas,
             'device': device_str,

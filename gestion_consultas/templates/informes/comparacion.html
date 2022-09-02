@@ -1,5 +1,7 @@
 {% extends 'layouts/base.html' %}
 {% block 'title' %}Comparativa{% endblock  %}
+{% block 'style' %}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@2.1.0/build/pure-min.css" integrity="sha384-yHIFVG6ClnONEA5yB5DJXfW2/KC173DIQrYoZMEtBvGzmf0PKiGyNEqe9N6BNDBH" crossorigin="anonymous">{% endblock  %}
+
 {% block 'content' %}
 <h2> Consulta comparativa </h2>
 <fieldset>
@@ -7,15 +9,49 @@
     <form action="/comparacion/" method="POST">
         {% csrf_token %}
         <hr/>
-            <label for="fechainicial">Desde: </label>
-            <input name="fechainicial" id="fechainicial" autocomplete="off" type="date"></input>
+        <div class = "rango_semana">
+            <div>
 
-            <label for="fechafinal">Hasta: </label>
-            <input name="fechafinal" id="fechafinal" autocomplete="off" type="date" ></input>
-            
-            <button class = "btn btn-success" style="background-color:rgb(0,0,85)" >Buscar</button>
+                <input type="radio" id="ck_semana" name="seleccion_rango" value="1" >
+                <labe for="ck_semana"><b>Filtrar Por Rango semanas: </b></label>
+
+                <label for="semana">Semana: </label>
+                <input name="semana" id="semana" autocomplete="off" type="week"></input>
+            </div>
+        </div>
         <hr/>
-        <div> 
+        <div class = "rango_meses">
+            <div>
+                
+                <input type="radio" id="ck_mes" name="seleccion_rango" value="2">
+                <labe for="ck_mes"><b>Filtrar Por Rango de meses: </b></label>
+            
+                <label for="mes">Desde: </label>
+                <input name="mes" id="mes" autocomplete="off" type="month"></input>
+
+                <label for="mes2">Hasta: </label>
+                <input name="mes2" id="mes2" autocomplete="off" type="month"></input>
+
+            </div>
+        </div>
+        <hr/>
+        <div class = "rango_fechas" style = "display: block;" >              
+
+                <input type="radio" id="ck_fechas" name="seleccion_rango" value="3" checked>
+                <labe for="ck_fechas" ><b>Filtrar Por Rango libre: </b></label>
+   
+                <label for="fechainicial">Desde: </label>
+                <input name="fechainicial" id="fechainicial" autocomplete="off" type="date"></input>
+                              
+                <label for="fechafinal">Hasta: </label>
+                <input name="fechafinal" id="fechafinal" autocomplete="off" type="date" ></input>
+
+                <div >
+                <button style="background-color:rgb(0,0,85); display: flex; justify-content: center; margin:10px; position:relative; letf:200px;" >Buscar</button>
+                </div>
+        <div>
+            <hr/>
+        <div style = "margin: 10px"> 
             <div>
                 <input type="radio" id="pet01" name="pet01" value="1">
                 <label for="pet01">PET01</label>
@@ -61,6 +97,7 @@
                 <label for="pet09">PET09</label>
             </div>
         </div>
+
     </form>
 <hr/>
 <h2>Informe de ventas por maquina</h2>
