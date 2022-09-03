@@ -26,11 +26,11 @@
                 <input type="radio" id="ck_mes" name="seleccion_rango" value="2">
                 <labe for="ck_mes"><b>Filtrar Por Rango de meses: </b></label>
             
-                <label for="mes">Desde: </label>
-                <input name="mes" id="mes" autocomplete="off" type="month"></input>
+                <label for="mes_ini">Desde: </label>
+                <input name="mes_ini" id="mes_ini" autocomplete="off" type="month"></input>
 
-                <label for="mes2">Hasta: </label>
-                <input name="mes2" id="mes2" autocomplete="off" type="month"></input>
+                <label for="mes_fin">Hasta: </label>
+                <input name="mes_fin" id="mes_fin" autocomplete="off" type="month"></input>
 
             </div>
         </div>
@@ -99,12 +99,13 @@
         </div>
 
     </form>
+
+
+</fieldset>
 <hr/>
 <h2>Informe de ventas por maquina</h2>
 <h4>Desde: {{fecha_ini}}  Hasta: {{fecha_fin}}</h4>
 <hr/>
-</fieldset>
-
 
     <div class = "container">
         <div class = "row">
@@ -136,7 +137,7 @@
         </div>
     </div>
 <hr/>
-<h2>Informe de ventas diario por maquina </h2>
+<h2>Informe de ventas {{rango}} por maquina </h2>
 <hr/>
 <div class = "container">
     <div class = "row">

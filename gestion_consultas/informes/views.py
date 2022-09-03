@@ -22,7 +22,7 @@ context1 = {}
 context2 = {}
 
 def informes(request):
-    tabla = models.TbProduct.objects.select_related().all()
+    tabla = models.TbProduct.objects.all()
     context = {'tabla' : tabla}   
     return render(request, 'informes/index.html',context)
     
@@ -265,17 +265,14 @@ def comparacion(request):
     total_diario_maquinas = []
     stop = 0
     
+    # variables del template
     start_date = request.POST.get('fechainicial')
     end_date = request.POST.get('fechafinal')  
-    
     check_box = request.POST.get('seleccion_rango')  
     semana = request.POST.get('semana')
-    
-    mes = request.POST.get('mes')  
-    
-    #print(check_box)
-    #print(semana)
-    
+    mes_ini = request.POST.get('mes_ini')  
+    mes_fin = request.POST.get('mes_fin')   
+        
     device = [ 
         request.POST.get('pet01'),
         request.POST.get('pet02'),
@@ -286,8 +283,9 @@ def comparacion(request):
         request.POST.get('pet07'),
         request.POST.get('pet08'),
         request.POST.get('pet09'),
-    ]      
-    # Tomar los valores de la lista diferentes de None - generar lista con los nombres de la maquinas
+    ]   
+       
+    # Tomar los valores validos de device - genera lista con los nombres de la maquinas
     for dev in device:
         if dev is not None:
             device_new.append(int(dev))
@@ -297,100 +295,158 @@ def comparacion(request):
               
         if check_box == "1": #opcion semanas
             pass
+        
         if check_box == "2": #opcion meses
-            control = 0
-            mes = mes + "-01" # fecha 01 del mes
-            start_date2 = datetime.datetime.strptime(mes, '%Y-%m-%d') #fecha inicial
-            mes = start_date2.month #mes en el que estoy
-            copia = start_date2 #fecha final inicia en fecha inicial
-            mes2 = copia.month #mes 2 inicia en el mes en el que estoy
+            fechas_iniciales = []
+            fechas_finales   = []
+            rango = "mensual"
+            mes_ini = mes_ini + "-01" #fecha del mes inicial
+            mes_fin = mes_fin + "-28" #fecha del mes final
+            #convetimos a formato de fecha
+            start_date2 = datetime.datetime.strptime(mes_ini, '%Y-%m-%d') 
+            end_date2 = datetime.datetime.strptime(mes_fin, '%Y-%m-%d') 
+            start_date3 = start_date2
+            while(start_date2 < end_date2):
+                fechas_iniciales.append(start_date2)
+                mes = start_date2.month #mes en el que estoy
+                mes2 = mes #mes 2 inicia en el mes en el que estoy
+                control = 0
+                while(control == 0): #itero el mes hasta el ultimo dia del mismo      
+                    start_date2 = start_date2 + datetime.timedelta(days=1)
+                    mes2 = start_date2.month
+                    if mes == mes2:
+                        copia = start_date2
+                    else:
+                        control = 1
+                    
+                fechas_finales.append(copia) # guardo el ultimo dia del mes
+                #start_date2 = start_date2 + datetime.timedelta(days=1) # start date comienza en el siguiente mes
             
-            while(control == 0): #itero el mes hasta el ultimo dia del mismo      
-                copia = copia + datetime.timedelta(days=1)
-                mes2 = copia.month
-                if mes == mes2:
-                    end_date2 = copia
-                else:
-                    control = 1
-    
+            for dev in device_new:
+                total_ = 0
+                querys = models.TbBilling.objects.filter(id_device=dev, billingtransaciondate__range=(start_date3, end_date2)).select_related()
+                for query in querys:
+                    total_ = query.billingtotal + total_
+                total_device.append(total_)
+
+            device_ventas = {device_str:total_device for (device_str,total_device) in zip(device_str,total_device)}
+            
+            #Total de ventas por maquina - mes
+            #generar lista con las fechas diarias segun rango seleccionado
+            
+            for dev in device_new: #recorre cada una de las maquinas
+                
+                total_diario_maquina = []
+                total_int = []
+                
+                for i in range(len(fechas_iniciales)):# recorre fechas diarias 
+                    
+                    querys = models.TbBilling.objects.filter(id_device=dev, billingtransaciondate__range=(fechas_iniciales[i], fechas_finales[i])).select_related()
+                    subtotal_device = 0 #variable que almacena los subtotales
+                    
+                    for query in querys:# suma la cantidad de ventas del dia
+                        subtotal_device = query.billingtotal + subtotal_device
+                        
+                    total_diario_maquina.append(subtotal_device) #lista con las ventas diarias de la maquina
+                    total_int.append(int(subtotal_device))
+                
+                total_int_.append(total_int)
+                total_diario_maquinas.append(total_diario_maquina) #lista de listas con las ventas diarias de todas las maquinas
+            
+            #creacion diccionario para generar las tablas
+            total_diario_maquinas = np.array(total_diario_maquinas)
+            total_diario_maquinas = total_diario_maquinas.transpose()
+            dic_device_ventas = {fechas_iniciales:total_diario_maquinas for (fechas_iniciales,total_diario_maquinas) in zip(fechas_iniciales,total_diario_maquinas)}     
+            
+            total_int_ = np.array(total_int_)
+            total_int_ = total_int_.transpose()
+            fechas_transpuesta = []
+            for element in fechas_iniciales:
+                fechas_transpuesta.append(str(element))
+            diccionario2 = {prueba:total for (prueba,total) in zip(fechas_transpuesta,total_int_)}
+            
+            context = {
+                'device_ventas': device_ventas,
+                'fecha_ini':mes_ini,
+                'fecha_fin':mes_fin,
+                'rango':rango,
+                'diccionario': dic_device_ventas,
+                'device': device_str,
+                'diccionario2': diccionario2,
+            }
+                      
         if check_box == "3": #opcion rango fechas
+            rango = "diario"
             start_date2 = datetime.datetime.strptime(start_date, '%Y-%m-%d') 
             end_date2 = datetime.datetime.strptime(end_date, '%Y-%m-%d') + datetime.timedelta(days=1)
-        fecha_ini = start_date2
-        fecha_fin = end_date2    
-        #conversion fechas para poder trabajar operaciones
-        
-        
-        #Total de ventas por maquina y rango de fecha
-        for dev in device_new:
-            total_ = 0
-            querys = models.TbBilling.objects.filter(id_device=dev, billingtransaciondate__range=(start_date2, end_date2)).select_related()
-            for query in querys:
-                total_ = query.billingtotal + total_
-            total_device.append(total_)
-        
-        device_ventas = {device_str:total_device for (device_str,total_device) in zip(device_str,total_device)}
-
-        #Total de ventas por maquina y dia
-        
-        #generar lista con las fecchas segun rango seleccionado
-        while(stop != 1):
             
-            lista_fechas.append(start_date2) 
-            start_date2 = start_date2 + datetime.timedelta(days=1)
+            # Fechas en formato y - m - d para mostrar en el template
+            fecha_ini = start_date2
+            fecha_fin = end_date2         
             
-            if start_date2 == end_date2:
-                stop = 1
+            #Total de ventas por maquina y rango de fecha
+            for dev in device_new:
+                total_ = 0
+                querys = models.TbBilling.objects.filter(id_device=dev, billingtransaciondate__range=(start_date2, end_date2)).select_related()
+                for query in querys:
+                    total_ = query.billingtotal + total_
+                total_device.append(total_)
+            
+            device_ventas = {device_str:total_device for (device_str,total_device) in zip(device_str,total_device)}
 
-        for dev in device_new: #recorro las maquinas
-            total_diario_maquina = []
-            total_int = []
-            #print(dev)
-            for fecha_i in lista_fechas:# busqueda diaria por maquina
-                fecha_f = fecha_i + datetime.timedelta(days=1)
-                querys = models.TbBilling.objects.filter(id_device=dev, billingtransaciondate__range=(fecha_i, fecha_f)).select_related()
-                subtotal_device = 0
-                #print(fecha_i)
-                for query in querys:# sumatoria del total de la venta en ese dia
-                    subtotal_device = query.billingtotal + subtotal_device
-                total_diario_maquina.append(subtotal_device) #lista con las ventas diarias de la maquina
-                total_int.append(int(subtotal_device))
-            #print(len(total_diario_maquina))
-            #print(sum(total_diario_maquina))
-            total_int_.append(total_int)
-            total_diario_maquinas.append(total_diario_maquina) #lista de listas con las ventas diarias de todas las maquinas
-        #print(total_int_)
-        
-        total_diario_maquinas = np.array(total_diario_maquinas)
-        total_diario_maquinas = total_diario_maquinas.transpose()
-        
-        total_int_ = np.array(total_int_)
-        total_int_ = total_int_.transpose()
+            #Total de ventas por maquina y dia
+            #generar lista con las fechas diarias segun rango seleccionado
+            while(stop != 1):
+                
+                lista_fechas.append(start_date2) 
+                start_date2 = start_date2 + datetime.timedelta(days=1)
+                
+                if start_date2 == end_date2:
+                    stop = 1
 
-        #print(total_int_)
-        
-        #print(total_diario_maquinas)    
-        dic_device_ventas = {lista_fechas:total_diario_maquinas for (lista_fechas,total_diario_maquinas) in zip(lista_fechas,total_diario_maquinas)}     
-        #print(dic_device_ventas)
-        prueba = []
-        
-        for element in lista_fechas:
-            prueba.append(str(element))
-        diccionario2 = {prueba:total for (prueba,total) in zip(prueba,total_int_)}
-        
-        #print(diccionario2)
-        
-        context={
-            'device_ventas':device_ventas, 
-            'fecha_ini':fecha_ini,
-            'fecha_fin':fecha_fin,
-            'fechas':lista_fechas,
-            'diccionario': dic_device_ventas,
-            'device': device_str,
-            'diccionario2': diccionario2,
-            'valor_grafica': total_int_
-        }
+            for dev in device_new: #recorre cada una de las maquinas
+                
+                total_diario_maquina = []
+                total_int = []
+                
+                for fecha_i in lista_fechas:# recorre fechas diarias 
+                    fecha_f = fecha_i + datetime.timedelta(days=1)
+                    querys = models.TbBilling.objects.filter(id_device=dev, billingtransaciondate__range=(fecha_i, fecha_f)).select_related()
+                    subtotal_device = 0 #variable que almacena los subtotales
+                    
+                    for query in querys:# suma la cantidad de ventas del dia
+                        subtotal_device = query.billingtotal + subtotal_device
+                        
+                    total_diario_maquina.append(subtotal_device) #lista con las ventas diarias de la maquina
+                    total_int.append(int(subtotal_device))
+                
+                total_int_.append(total_int)
+                total_diario_maquinas.append(total_diario_maquina) #lista de listas con las ventas diarias de todas las maquinas
+            
+            #creacion diccionario para generar las tablas
+            total_diario_maquinas = np.array(total_diario_maquinas)
+            total_diario_maquinas = total_diario_maquinas.transpose()
+            dic_device_ventas = {lista_fechas:total_diario_maquinas for (lista_fechas,total_diario_maquinas) in zip(lista_fechas,total_diario_maquinas)}     
+            
+            #creacion diccionario para generar las graficas
+            total_int_ = np.array(total_int_)
+            total_int_ = total_int_.transpose()
+            fechas_transpuesta = []
+            for element in lista_fechas:
+                fechas_transpuesta.append(str(element))
+            diccionario2 = {prueba:total for (prueba,total) in zip(fechas_transpuesta,total_int_)}
+            
+            context={
+                'device_ventas':device_ventas, 
+                'fecha_ini':fecha_ini,
+                'fecha_fin':fecha_fin,
+                'diccionario': dic_device_ventas,
+                'device': device_str,
+                'diccionario2': diccionario2,
+                'rango': rango
+                    }
     else:
         context = {}
+        
     return render(request, 'informes/comparacion.html', context)
     
