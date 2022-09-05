@@ -1,0 +1,87 @@
+{% extends 'layouts/base.html' %}
+{% block 'title' %}Filtro por horas{% endblock  %}
+
+{% block 'content' %}
+
+<h4>Filtro por horas<h4>
+<hr/>
+<form action = "/horas/" method="POST">
+    {% csrf_token %}
+    <label for="fecha_ini">Desde: </label>
+    <input name="fecha_ini" id="fecha_ini" type="date"></input>
+
+    <label for="fecha_fin">Hasta: </label>
+    <input name="fecha_fin" id="fecha_fin" type="date"></inpu>
+    <hr/>
+    <div style = "display: flex; justify-content: center;">
+    <scroll-container style ="display:block; width:200px; height:200px; overflow-y:scroll; scroll-behavior:smooth;">
+        <label><input type="checkbox" id="cbox1" name="cbox1" value="1"> PET01</label><br>
+        <label><input type="checkbox" id="cbox2" name="cbox2" value="2"> PET02</label><br>
+        <label><input type="checkbox" id="cbox3" name="cbox3" value="3"> PET03</label><br>
+        <label><input type="checkbox" id="cbox4" name="cbox4" value="4"> PET04</label><br>
+        <label><input type="checkbox" id="cbox5" name="cbox5" value="5"> PET05</label><br>
+        <label><input type="checkbox" id="cbox6" name="cbox6" value="6"> PET06</label><br>
+        <label><input type="checkbox" id="cbox7" name="cbox7" value="7"> PET07</label><br>
+        <label><input type="checkbox" id="cbox8" name="cbox8" value="8"> PET08</label><br>
+        <label><input type="checkbox" id="cbox9" name="cbox9" value="9"> PET_A</label><br>
+        <label><input type="checkbox" id="cbox10" name="cbox10" value="10"> PET09</label><br>
+        <label><input type="checkbox" id="cbox11" name="cbox11" value="11"> PET_A</label><br>
+        <label><input type="checkbox" id="cbox12" name="cbox12" value="17"> PET10</label><br>
+        <label><input type="checkbox" id="cbox13" name="cbox13" value="18"> PET11</label><br>
+        <label><input type="checkbox" id="cbox14" name="cbox14" value="19"> PET12</label><br>
+        <label><input type="checkbox" id="cbox15" name="cbox15" value="20"> PET13</label><br>
+        <label><input type="checkbox" id="cbox16" name="cbox16" value="21"> MEX</label><br>
+        <label><input type="checkbox" id="cbox17" name="cbox17" value="22"> PET14</label><br>
+        <label><input type="checkbox" id="cbox18" name="cbox18" value="23"> PET15</label><br>
+        <label><input type="checkbox" id="cbox19" name="cbox19" value="24"> PET16</label><br>
+        <label><input type="checkbox" id="cbox20" name="cbox20" value="25"> PET17</label><br>
+        <label><input type="checkbox" id="cbox21" name="cbox21" value="26"> PET18</label><br>
+    </scroll-container>
+    </div>
+    <hr/>
+    <div style="display:flex; justify-content: center;">
+        <button class = "btn btn-success" style="background-color:rgb(0,0,85)" >Filtrar</button>
+    </div>
+</form>
+
+<hr/>
+<h2>Informe de ventas de la zona</h2>
+<hr/>
+    <div class = "container">
+        <div class = "row">
+            <div class = "cold-md-4.offset-md-4">
+                <div class = "tile">
+                    <div class = "tile-body">
+                        <div class = "table-resposive">
+                            <table class = "table table-hover table-bordered" id = "tablafacturas">
+                                <thead class = "table-dark " > 
+                                    <tr>
+                                        <th>Id venta</th>
+                                        <th>Id maquina</th>
+                                        <th>total venta</th>
+                                        <th>fecha</th>
+
+                                    </tr>        
+                                </thead>
+                                <tbody> 
+                                    
+                                    {% for query in querys %}
+                                    <tr>
+                                        <td>{{query.id_billing}}</td>
+                                        <td>{{query.id_device}}</td>
+                                        <td>{{query.billingtotal}}</td>
+                                        <td>{{query.billingtransaciondate}}</td>
+                                    </tr> 
+                                    {% endfor %}     
+                                                                          
+                                </tbody>            
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<hr/>
+
+{% endblock  %}

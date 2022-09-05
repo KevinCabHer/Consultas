@@ -45,7 +45,7 @@ class TbBilling(models.Model):
     ibillingpaymentdata = models.TextField(db_column='IBillingPaymentData', blank=True, null=True)  # Field name made lowercase.
 
     def __str__(self):
-        return self.id_billing
+        return str(self.id_billing)
     
     class Meta:
         managed = False

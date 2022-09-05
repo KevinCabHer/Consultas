@@ -12,6 +12,9 @@ from django.template.loader import get_template
 from django.template.loader import render_to_string
 import pdfkit
 from jinja2 import Environment, FileSystemLoader 
+from django.db import connection
+from django.db.models import Sum
+
 
 path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
 config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
@@ -449,4 +452,45 @@ def comparacion(request):
         context = {}
         
     return render(request, 'informes/comparacion.html', context)
+
+
+def horas(request):
+    
+    fecha_ini = request.POST.get("fecha_ini")
+    fecha_fin = request.POST.get("fecha_fin")
+    
+    device = [
+        request.POST.get("cbox1"), request.POST.get("cbox2"), request.POST.get("cbox3"),
+        request.POST.get("cbox4"), request.POST.get("cbox5"), request.POST.get("cbox6"),
+        request.POST.get("cbox7"), request.POST.get("cbox8"), request.POST.get("cbox9"),
+        request.POST.get("cbox10"), request.POST.get("cbox11"), request.POST.get("cbox12"),
+        request.POST.get("cbox13"), request.POST.get("cbox14"), request.POST.get("cbox15"),
+        request.POST.get("cbox16"), request.POST.get("cbox17"), request.POST.get("cbox18"),
+        request.POST.get("cbox19"), request.POST.get("cbox20"), request.POST.get("cbox21"),]
+    
+    device_new = []
+    for dev in device:
+        if dev != None:
+            device_new.append(str(dev))
+    
+    if fecha_fin != None and fecha_ini != None:       
+        fecha_ini_ = datetime.datetime.strptime(fecha_ini, '%Y-%m-%d') 
+        fecha_fin_ = datetime.datetime.strptime(fecha_fin, '%Y-%m-%d')
+        total = []
+        for dev in device_new: 
+            #querys = models.TbBilling.objects.filter(id_device=dev, billingtransaciondate__range=(fecha_ini_,fecha_fin_)).values_list('id_billing','id_device', 'billingtotal' , 'billingtransaciondate', named=True)
+            querys = models.TbBilling.objects.filter(id_device=dev, billingtransaciondate__range=(fecha_ini_,fecha_fin_)).values_list('id_device', 'billingtotal', named=True).annotate(sum=Sum('billingtotal')) 
+            print(querys)
+            total.append(querys)
+        
+        #print(querys)
+        #print(total)
+        context = {
+            'querys':total,
+        }
+    else:
+        context = {
+            
+        }
+    return render(request, 'informes/horas.html', context)
     
