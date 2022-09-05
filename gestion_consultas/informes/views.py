@@ -1,4 +1,5 @@
 from calendar import c, month
+from decimal import Decimal
 from django.shortcuts import render
 from django.http import HttpResponse
 from . import models
@@ -14,6 +15,7 @@ import pdfkit
 from jinja2 import Environment, FileSystemLoader 
 from django.db import connection
 from django.db.models import Sum
+from pytz import timezone
 
 
 path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
@@ -25,8 +27,9 @@ context1 = {}
 context2 = {}
 
 def informes(request):
-    tabla = models.TbProduct.objects.all()
+    tabla = models.TbProduct.objects.all().values_list('id_product', 'productname', 'id_category', 'productprice', named = True)
     context = {'tabla' : tabla}   
+    print(tabla)
     return render(request, 'informes/index.html',context)
     
 def inicio(request):
@@ -456,9 +459,11 @@ def comparacion(request):
 
 def horas(request):
     
+    #Criterios de busqueda
+    #Fechas
     fecha_ini = request.POST.get("fecha_ini")
     fecha_fin = request.POST.get("fecha_fin")
-    
+    #Maquinas
     device = [
         request.POST.get("cbox1"), request.POST.get("cbox2"), request.POST.get("cbox3"),
         request.POST.get("cbox4"), request.POST.get("cbox5"), request.POST.get("cbox6"),
@@ -468,25 +473,51 @@ def horas(request):
         request.POST.get("cbox16"), request.POST.get("cbox17"), request.POST.get("cbox18"),
         request.POST.get("cbox19"), request.POST.get("cbox20"), request.POST.get("cbox21"),]
     
+    #Filtrar ID seleccioandos y convertilos a String
     device_new = []
+    device_str = []
     for dev in device:
         if dev != None:
             device_new.append(str(dev))
-    
-    if fecha_fin != None and fecha_ini != None:       
-        fecha_ini_ = datetime.datetime.strptime(fecha_ini, '%Y-%m-%d') 
-        fecha_fin_ = datetime.datetime.strptime(fecha_fin, '%Y-%m-%d')
-        total = []
-        for dev in device_new: 
-            #querys = models.TbBilling.objects.filter(id_device=dev, billingtransaciondate__range=(fecha_ini_,fecha_fin_)).values_list('id_billing','id_device', 'billingtotal' , 'billingtransaciondate', named=True)
-            querys = models.TbBilling.objects.filter(id_device=dev, billingtransaciondate__range=(fecha_ini_,fecha_fin_)).values_list('id_device', 'billingtotal', named=True).annotate(sum=Sum('billingtotal')) 
-            print(querys)
-            total.append(querys)
+            device_str.append("PET0"+dev)
+            
+    #Si hay una nfecha seleccionada
+    if fecha_fin != None and fecha_ini != None: 
+        #Contenedores
+        horas = []
+        cont = []
+        dic = {}      
+        #conversión de fecha
+        fecha_ini_ = datetime.datetime.strptime(fecha_ini, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+        fecha_fin_ = datetime.datetime.strptime(fecha_fin, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=0)
+
+        copia_fecha_fin_ = fecha_fin_
+        copia_fecha_ini_ = fecha_ini_
         
-        #print(querys)
-        #print(total)
+        while(copia_fecha_ini_<fecha_fin_):
+            cont.append(copia_fecha_ini_)
+            copia_fecha_ini_ = copia_fecha_ini_ + datetime.timedelta(hours=1)
+            cont.append(copia_fecha_ini_)
+            horas.append(cont)
+            cont = []
+        cont = []
+        totales = []              
+        #print(horas)
+    
+        querys = models.TbBilling.objects.filter(id_device = 1, billingtransaciondate__range=(fecha_ini_,fecha_fin_)).values_list('id_device','billingtotal','billingtransaciondate', named = True).order_by('billingtransaciondate')
+        
+        for hora in horas:
+            total = 0
+            for query in querys:
+                if query.billingtransaciondate >= hora[0] and query.billingtransaciondate <= hora [1]:
+                    total = total + query.billingtotal
+            dic[hora[0]] = total       
+           
+        print(dic)
+              
         context = {
-            'querys':total,
+            #'querys' : '',
+            'device' : device_str
         }
     else:
         context = {

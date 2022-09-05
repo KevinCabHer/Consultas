@@ -56,24 +56,22 @@
                             <table class = "table table-hover table-bordered" id = "tablafacturas">
                                 <thead class = "table-dark " > 
                                     <tr>
-                                        <th>Id venta</th>
-                                        <th>Id maquina</th>
-                                        <th>total venta</th>
-                                        <th>fecha</th>
-
+                                        <th>hora</th>
+                                        {% for dev in device %}
+                                        <th>{{dev}}</th>
+                                        {% endfor %}
+                                        
                                     </tr>        
                                 </thead>
                                 <tbody> 
-                                    
-                                    {% for query in querys %}
+                                    {% for key,value in querys.items %}
                                     <tr>
-                                        <td>{{query.id_billing}}</td>
-                                        <td>{{query.id_device}}</td>
-                                        <td>{{query.billingtotal}}</td>
-                                        <td>{{query.billingtransaciondate}}</td>
+                                        <td>{{ key }}</td>  
+                                        {% for val in value %}
+                                        <td>{{ val }}</td>   
+                                        {% endfor %}                                  
                                     </tr> 
-                                    {% endfor %}     
-                                                                          
+                                    {% endfor %}                                        
                                 </tbody>            
                             </table>
                         </div>
