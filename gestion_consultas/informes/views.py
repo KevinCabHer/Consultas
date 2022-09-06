@@ -1,5 +1,6 @@
 from calendar import c, month
 from decimal import Decimal
+from multiprocessing import context
 from django.shortcuts import render
 from django.http import HttpResponse
 from . import models
@@ -463,24 +464,13 @@ def horas(request):
     fecha_ini = request.POST.get("fecha_ini")
     #fecha_fin = request.POST.get("fecha_fin")
     #Maquinas
-    device = [
-        request.POST.get("cbox1"), request.POST.get("cbox2"), request.POST.get("cbox3"),
-        request.POST.get("cbox4"), request.POST.get("cbox5"), request.POST.get("cbox6"),
-        request.POST.get("cbox7"), request.POST.get("cbox8"), request.POST.get("cbox9"),
-        request.POST.get("cbox10"), request.POST.get("cbox11"), request.POST.get("cbox12"),
-        request.POST.get("cbox13"), request.POST.get("cbox14"), request.POST.get("cbox15"),
-        request.POST.get("cbox16"), request.POST.get("cbox17"), request.POST.get("cbox18"),
-        request.POST.get("cbox19"), request.POST.get("cbox20"), request.POST.get("cbox21"),]
          
     #Si hay una fecha seleccionada
     if fecha_ini != None: 
         #Filtrar ID seleccioandos y convertilos a Int
-        device_new = []
-        device_str = []
-        for dev in device:
-            if dev != None:
-                device_new.append(int(dev))
-                device_str.append("PET0"+dev)
+        maquinas = device(request)
+        device_new = maquinas[0]
+        device_str = maquinas[1]
         #Contenedores
         horas = []
         cont = []
@@ -520,4 +510,138 @@ def horas(request):
             
         }
     return render(request, 'informes/horas.html', context)
+
+def maximos(request): 
+    
+    #Valores seleccionados en el front para el filtro
+    chk = request.POST.get("seleccion_rango")
+    fecha_ini = request.POST.get("fechainicial")
+    fecha_fin = request.POST.get("fechafinal")
+    dia = request.POST.get("dia")
+    #función que devuelve los Id de las maquinas seleccionadas como String y Entero 
+    maquinas = device(request)
+    device_new = maquinas[0]
+    device_str = maquinas[1]
+    
+    #En caso de seleccionar filtro por rango de fecha 
+    if chk == "1" and fecha_ini != None and fecha_fin != None:
+        pass
+     
+    #En caso de seleccionar filtro por dia       
+    if chk == "2" and dia != None:
+        
+        horas = []
+        dic = {}
+        cont = []
+        totales = []
+        
+        #rango de fecha desde las 00:00:00 hasta las 23:59:59
+        fecha_ini_ = datetime.datetime.strptime(dia, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+        fecha_fin_ = datetime.datetime.strptime(dia, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=0)
+        
+        #Generar lista con los intervalos de tiempo en horas
+        copia_fecha_ini_ = fecha_ini_
+        while(copia_fecha_ini_<fecha_fin_):
+            cont.append(copia_fecha_ini_)
+            copia_fecha_ini_ = copia_fecha_ini_ + datetime.timedelta(hours=1)
+            cont.append(copia_fecha_ini_)
+            horas.append(cont)
+            cont = []
+        
+        #Consulta con los datos de la tabla de ventas en el rango de fecha seleccionado  
+        querys = models.TbBilling.objects.filter(billingtransaciondate__range=(fecha_ini_,fecha_fin_)).values_list('id_device','billingtotal','billingtransaciondate', named = True)
+        
+        for hora in horas:              #Recorre el intervalo de fechas 
+            for dev in device_new:      #Recorre el numero de maquinas seleccionadas
+                total = 0               #Reinicia el acumulador
+                for query in querys:    #recorre el query
+                    #Siempre y cuando sea la maquina buscada dentro del tiempo establecido
+                    if query.id_device == dev and query.billingtransaciondate >= hora[0] and query.billingtransaciondate <= hora [1]: #si 
+                        total = total + query.billingtotal #acumula las ventas que se encuentren en el rango de fechas y la maquina iterada  
+                cont.append(total) #Agrega las ventas totales a un vector con que contiene las ventas de todas las maquinas consultada para un rango de tiempo
+            totales.append(cont)
+            dic[hora[1]] = cont #se relaciona el vector cont con el intervalo de tiempo correspondiente
+            cont = []
+        
+        num_device = (len(device_new)) #Cantidad de maquinas consultadas
+        
+        #vectores vacios que contendran las estadisticas
+        vector_maximos = [0]*num_device
+        vector_fechas = [0]*num_device
+        vector_sumatoria = [0]*num_device
+        vector_contandor = [0]*num_device
+        vector_promedio = [0]*num_device
+               
+        for x in dic:
+            for y in range(num_device):
+                #acumulador del total vendido de cada maquina                
+                vector_sumatoria[y] = vector_sumatoria[y] + dic[x][y]
+                
+                if dic[x][y] != 0:
+                    vector_contandor[y] = vector_contandor[y] + 1 
+                
+                
+                if dic[x][y] > vector_maximos[y]:                                                                                                      
+                    vector_fechas[y] = x
+                    vector_maximos[y] = dic[x][y] 
+                    
+        print(vector_sumatoria)
+        print(vector_contandor)
+    
+        for i in range(num_device):
+            if vector_contandor[i] != 0:
+                vector_promedio[i] = round((vector_sumatoria[i]/vector_contandor[i]),2)
+            else: 
+                vector_promedio[i] = 0
+        
+        maximos = []
+        maximos.append(vector_fechas)
+        maximos.append(vector_maximos)
+        
+        promedio = []
+        promedio.append(vector_fechas)
+        promedio.append(vector_promedio)
+        
+        context = {
+            'querys' : dic,
+            'device' : device_str,
+            'maximos' : maximos,
+            'promedio' : promedio,
+            'total': vector_sumatoria,
+            'condicion': 1
+        }
+        
+    else:
+        context = {
+            'condicion': 0,
+        }
+    
+    return render(request,'informes/maximos.html',context)
+
+#Validación de los checkbox seleccionados 
+def device(request):
+    device = [
+        request.POST.get("cbox1"), request.POST.get("cbox2"), request.POST.get("cbox3"),
+        request.POST.get("cbox4"), request.POST.get("cbox5"), request.POST.get("cbox6"),
+        request.POST.get("cbox7"), request.POST.get("cbox8"), request.POST.get("cbox9"),
+        request.POST.get("cbox10"), request.POST.get("cbox11"), request.POST.get("cbox12"),
+        request.POST.get("cbox13"), request.POST.get("cbox14"), request.POST.get("cbox15"),
+        request.POST.get("cbox16"), request.POST.get("cbox17"), request.POST.get("cbox18"),
+        request.POST.get("cbox19"), request.POST.get("cbox20"), request.POST.get("cbox21"),]
+
+    device_new = []
+    device_str = []
+    device_full = []
+    
+    for dev in device:
+        if dev != None:
+            device_new.append(int(dev))
+            device_str.append("PET0"+dev)
+            
+    device_full.append(device_new)
+    
+    device_full.append(device_str)
+    
+    return (device_full)
+    
     

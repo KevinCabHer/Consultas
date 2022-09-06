@@ -1,0 +1,186 @@
+{% extends 'layouts/base.html' %}
+
+{% block 'content' %}
+
+<h2>INFORME DETALLADO DE VENTA</h2>
+
+<form action="/maximos/" method="POST" style = "font-size: 20px;">
+    {% csrf_token %}
+    <hr/>
+    
+    <div>
+        <input type="radio" id="ck_rango" name="seleccion_rango" value="1" checked>
+        <labe for="ck_rango"><b>Rango de fechas: </b></label>
+
+        <label for="fechainicial">Desde: </label>
+        <input name="fechainicial" id="fechainicial" type="date"></input>
+                        
+        <label for="fechafinal">Hasta: </label>
+        <input name="fechafinal" id="fechafinal" type="date" ></input>
+    </div>
+    
+    <hr/>
+    
+    <div>
+        <input type="radio" id="ck_dia" name="seleccion_rango" value="2">
+        <labe for="ck_dia"><b>Dia especifico: </b></label>
+
+        <label for="dia">Seleccione el dia: </label>
+        <input name="dia" id="dia" type="date" ></input>
+    </div>
+
+    <div style = "display: flex; justify-content: center; spacing: 20px; padding: 10px;">
+    <scroll-container style ="display:block; width:180px; height:210px; overflow-y:scroll; scroll-behavior:smooth;">
+        <label><input type="checkbox" id="cbox1" name="cbox1" value="1"> PET01</label><br>
+        <label><input type="checkbox" id="cbox2" name="cbox2" value="2"> PET02</label><br>
+        <label><input type="checkbox" id="cbox3" name="cbox3" value="3"> PET03</label><br>
+        <label><input type="checkbox" id="cbox4" name="cbox4" value="4"> PET04</label><br>
+        <label><input type="checkbox" id="cbox5" name="cbox5" value="5"> PET05</label><br>
+        <label><input type="checkbox" id="cbox6" name="cbox6" value="6"> PET06</label><br>
+        <label><input type="checkbox" id="cbox7" name="cbox7" value="7"> PET07</label><br>
+        <label><input type="checkbox" id="cbox8" name="cbox8" value="8"> PET08</label><br>
+        <label><input type="checkbox" id="cbox9" name="cbox9" value="9"> PET_A</label><br>
+        <label><input type="checkbox" id="cbox10" name="cbox10" value="10"> PET09</label><br>
+        <label><input type="checkbox" id="cbox11" name="cbox11" value="11"> PET_A</label><br>
+        <label><input type="checkbox" id="cbox12" name="cbox12" value="17"> PET10</label><br>
+        <label><input type="checkbox" id="cbox13" name="cbox13" value="18"> PET11</label><br>
+        <label><input type="checkbox" id="cbox14" name="cbox14" value="19"> PET12</label><br>
+        <label><input type="checkbox" id="cbox15" name="cbox15" value="20"> PET13</label><br>
+        <label><input type="checkbox" id="cbox16" name="cbox16" value="21"> MEX</label><br>
+        <label><input type="checkbox" id="cbox17" name="cbox17" value="22"> PET14</label><br>
+        <label><input type="checkbox" id="cbox18" name="cbox18" value="23"> PET15</label><br>
+        <label><input type="checkbox" id="cbox19" name="cbox19" value="24"> PET16</label><br>
+        <label><input type="checkbox" id="cbox20" name="cbox20" value="25"> PET17</label><br>
+        <label><input type="checkbox" id="cbox21" name="cbox21" value="26"> PET18</label><br>
+    </scroll-container>
+    </div>
+
+    <hr/>
+    <div style = "display: flex; justify-content: center; align-items: center; spacing: 20px; padding: 10px;" >
+        <button class = "btn btn-success" style="background-color:rgb(0,0,85)" >Filtrar</button>
+    </div>
+    <hr/>
+    
+</form>
+{% if condicion == 1 %}
+<hr/>
+<h3>MAXIMÁS VENTAS POR HORA</h3>
+<hr/>
+    <div class = "container">
+        <div class = "row">
+            <div class = "cold-md-4.offset-md-4">
+                <div class = "tile">
+                    <div class = "tile-body">
+                        <div class = "table-resposive">
+                            <table class = "table table-hover table-bordered" id = "tablafacturas">
+                                <thead class = "table-dark " > 
+                                    <tr>
+                                        {% for dev in device %}
+                                        <th>{{dev}}</th>
+                                        {% endfor %}
+                                    </tr>        
+                                </thead>
+                                <tbody> 
+                                    {% for maxs in maximos %}
+                                    <tr>  
+                                        {% for max in maxs %}
+                                        <td>{{ max }}</td>   
+                                        {% endfor %}                                  
+                                    </tr> 
+                                    {% endfor %}                                        
+                                </tbody>            
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<hr/>
+<h3>PROMEDIO DE VENTAS</h3>
+<hr/>
+    <div class = "container">
+        <div class = "row">
+            <div class = "cold-md-4.offset-md-4">
+                <div class = "tile">
+                    <div class = "tile-body">
+                        <div class = "table-resposive">
+                            <table class = "table table-hover table-bordered" id = "tablafacturas">
+                                <thead class = "table-dark " > 
+                                    <tr>
+                                        {% for dev in device %}
+                                        <th>{{dev}}</th>
+                                        {% endfor %}
+                                    </tr>        
+                                </thead>
+                                <tbody> 
+                                    {% for maxs in promedio %}
+                                    <tr>  
+                                        {% for max in maxs %}
+                                        <td>{{ max }}</td>   
+                                        {% endfor %}                                  
+                                    </tr> 
+                                    {% endfor %}                                        
+                                </tbody>            
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<hr/>
+<h3>DETALLADO DE VENTAS</h3>
+<hr/>
+    <div class = "container">
+        <div class = "row">
+            <div class = "cold-md-4.offset-md-4">
+                <div class = "tile">
+                    <div class = "tile-body">
+                        <div class = "table-resposive">
+                            <table class = "table table-hover table-bordered" id = "tablafacturas">
+                                <thead class = "table-dark " > 
+                                    <tr>
+                                        <th>hora</th>
+                                        {% for dev in device %}
+                                        <th>{{dev}}</th>
+                                        {% endfor %}
+                                        
+                                    </tr>        
+                                </thead>
+                                <tbody> 
+                                    {% for key,value in querys.items %}
+                                    <tr>
+                                        <td>{{ key }}</td>  
+                                        {% for val in value %}
+                                        <td>{{ val }}</td>   
+                                        {% endfor %}                                  
+                                    </tr> 
+                                    {% endfor %}
+                                    <tr class = "table-dark" > 
+                                      <td>Total</td>
+                                      {% for t in total %}
+                                      <td>{{ t }}</td>
+                                      {% endfor %}  
+                                    </tr>
+                                </tbody>            
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<hr/>
+<h2>GRAFICO DE VENTAS HORA VS TOTAL</h2>
+<hr/>
+<div>
+    <div id="horas" style="width: 1200px; height: 600px;"></div>
+</div>
+
+
+{% endif %}
+
+    
+
+{% endblock  %}

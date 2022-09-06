@@ -1,0 +1,109 @@
+<script type="text/javascript">
+  google.charts.load('current', {'packages':['corechart']});
+  google.charts.setOnLoadCallback(drawChart);
+
+  function drawChart() {
+
+    var data = google.visualization.arrayToDataTable([
+      ['Zona', 'Cantidad'],
+      ['Galerias',      {{venta1}}],
+      ['Oviedo',        {{venta2}}],
+      ['Plaza Imperial',{{venta3}}],
+      ['Centro Mayor',  {{venta4}}],
+      ['El eden',       {{venta5}}],
+      ['Gran Plaza Bosa',    {{venta6}}],
+      ['Gran Plaza Soacha',  {{venta7}}],
+      ['Nuestro Bogota',     {{venta8}}],
+      ['Pet Asistida',   {{venta9}}],
+      ['Diver Plaza',    {{venta10}}],
+      ['Elena',          {{venta11}}],
+      ['Gran Plaza Medellin',    {{venta12}}],
+      ['Altavista',              {{venta13}}],
+      ['Cabecera Cuarto Etapa',  {{venta14}}],
+      ['Bulevar Niza',           {{venta15}}],
+      ['Mexico',         {{venta16}}],
+      ['Cañaveral',      {{venta17}}],
+      ['Puerta del Norte',       {{venta18}}],
+      ['Punto de la Oriental',   {{venta19}}],
+    ]);
+
+    var options = {
+      title: ''
+    };
+
+    var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+
+    chart.draw(data, options);
+  }
+</script>
+
+<script type="text/javascript">
+  google.charts.load('current', {'packages':['corechart']});
+  google.charts.setOnLoadCallback(drawChart);
+
+  function drawChart() {
+
+    var data = google.visualization.arrayToDataTable([
+      ['Dia', 'Total'],
+      {% for key, value in contenedor2.items %}
+      ['{{ key }}',      {{ value }}], 
+      {% endfor %}         
+    ]);
+
+    var options = {
+      title: ''
+    };
+
+    var chart = new google.visualization.LineChart(document.getElementById('prueba'));
+
+    chart.draw(data, options);
+  }
+</script>
+
+<script type="text/javascript">
+  google.charts.load('current', {'packages':['corechart']});
+  google.charts.setOnLoadCallback(drawChart);
+
+  function drawChart() {
+
+    var data = google.visualization.arrayToDataTable([
+      
+      ['Dia', {% for maquina in device %} '{{ maquina }}', {% endfor %} ],
+      {% for key, value in diccionario2.items %}
+      ['{{ key }}',     {% for val1 in value %} {{ val1 }}, {% endfor %} ], 
+      {% endfor %}         
+    ]);
+
+    var options = {
+      title: ''
+    };
+
+    var chart = new google.visualization.LineChart(document.getElementById('prueba2'));
+
+    chart.draw(data, options);
+  }
+</script>
+
+<script type="text/javascript">
+  google.charts.load('current', {'packages':['corechart']});
+  google.charts.setOnLoadCallback(drawChart);
+
+  function drawChart() {
+
+    var data = google.visualization.arrayToDataTable([
+      
+      ['Horas', {% for maquina in device %} '{{ maquina }}', {% endfor %} ],
+      {% for key, value in querys.items %}
+      ['{{ key }}',     {% for val1 in value %} {{ val1 }}, {% endfor %} ], 
+      {% endfor %}         
+    ]);
+
+    var options = {
+      title: '',
+    };
+
+    var chart = new google.visualization.LineChart(document.getElementById('horas'));
+
+    chart.draw(data, options);
+  }
+</script>
