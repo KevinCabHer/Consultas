@@ -64,7 +64,7 @@
 </form>
 {% if condicion == 1 %}
 <hr/>
-<h3>MAXIMÁS VENTAS POR HORA</h3>
+<h3>MAXIMAS VENTAS POR {{rango}}</h3>
 <hr/>
     <div class = "container">
         <div class = "row">
@@ -141,7 +141,7 @@
                             <table class = "table table-hover table-bordered" id = "tablafacturas">
                                 <thead class = "table-dark " > 
                                     <tr>
-                                        <th>hora</th>
+                                        <th>{{rango}}}</th>
                                         {% for dev in device %}
                                         <th>{{dev}}</th>
                                         {% endfor %}
@@ -158,7 +158,7 @@
                                     </tr> 
                                     {% endfor %}
                                     <tr class = "table-dark" > 
-                                      <td>Total</td>
+                                      <td>TOTAL</td>
                                       {% for t in total %}
                                       <td>{{ t }}</td>
                                       {% endfor %}  
@@ -172,10 +172,10 @@
         </div>
     </div>
 <hr/>
-<h2>GRAFICO DE VENTAS HORA VS TOTAL</h2>
+<h2>GRAFICO DE VENTAS {{rango}} VS TOTAL</h2>
 <hr/>
 <div>
-    <div id="horas" style="width: 1200px; height: 600px;"></div>
+    <div id="horas" style="width: 1100px; height: 600px;"></div>
 </div>
 
 

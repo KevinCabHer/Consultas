@@ -18,7 +18,6 @@ from django.db import connection
 from django.db.models import Sum
 from pytz import timezone
 
-
 path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
 config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
 from xhtml2pdf import pisa
@@ -27,16 +26,16 @@ from django.contrib.staticfiles import finders
 context1 = {}
 context2 = {}
 
-def informes(request):
-    tabla = models.TbProduct.objects.all().values_list('id_product', 'productname', 'id_category', 'productprice', named = True)
-    context = {'tabla' : tabla}   
-    return render(request, 'informes/index.html',context)
-    
 def inicio(request):
     return render(request, 'informes/inicio.html',{})
 
 def about(request):   
     return render(request, 'informes/about.html',{})
+
+def informes(request):
+    tabla = models.TbProduct.objects.all().values_list('id_product', 'productname', 'id_category', 'productprice', named = True)
+    context = {'tabla' : tabla}   
+    return render(request, 'informes/index.html',context)
 
 def ventas(request):
     total  =    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] #esto se puede mejorar
@@ -95,79 +94,46 @@ def ventas(request):
     context1 = {
         'venta1':cant[0],
         'total1':total[0],
-
         'venta2':cant[1],
         'total2':total[1],
-        
         'venta3':cant[2],
         'total3':total[2],
-        
         'venta4':cant[3],
         'total4':total[3],
-        
         'venta5':cant[4],
         'total5':total[4],
-        
         'venta6':cant[5],
         'total6':total[5],
-        
         'venta7':cant[6],
         'total7':total[6],
-        
         'venta8':cant[7],
         'total8':total[7],
-        
         'venta9':cant[8],
         'total9':total[8],
-        
         'venta10':cant[9],
         'total10':total[9],
-        
         'venta11':cant[10],
         'total11':total[10],
-        
         'venta12':cant[11],
         'total12':total[11],
-        
         'venta13':cant[12],
         'total13':total[12],
-        
         'venta14':cant[13],
         'total14':total[13],
-        
         'venta15':cant[14],
         'total15':total[14],
-        
         'venta16':cant[15],
         'total16':total[15],
-        
         'venta17':cant[16],
         'total17':total[16],
-        
         'venta18':cant[17],
         'total18':total[17],
-        
         'venta19':cant[18],
         'total19':total[18],
-        
         'Total':gran_total,
-        'placas': placas_total,
-        
-    }
-    #return HttpResponse("prueba")
+        'placas': placas_total,}
+    
     return render(request, 'informes/ventas.html',context1)
-
-def pdf(request):
-    template = get_template('informes/ventas.html')
-    #context = {'title':''}
-    html = template.render(context1)
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="reporte_ventas.pdf"'
-    
-    pisa_status = pisa.CreatePDF(
-       html, dest=response)
-    
-    return response
 
 def maquinas(request):
     lista_fechas = []
@@ -246,18 +212,6 @@ def maquinas(request):
         return render(request, 'informes/maquinas.html', context2)
     else:
         return render(request, 'informes/maquinas.html', {'zonas':zonas,})
-
-def pdf2(request):
-    template = get_template('informes/maquinas.html')
-    #context = {'title':''}
-    html = template.render(context2)
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="reporte_maquinas.pdf"'
-    
-    pisa_status = pisa.CreatePDF(
-       html, dest=response)
-    
-    return response
 
 def comparacion(request):
     total_device = []
@@ -459,18 +413,16 @@ def comparacion(request):
 
 def horas(request):
     
-    #Criterios de busqueda seleccionados en el HTML
-    #Fechas
+    #Criterios de busqueda seleccionados en el front
+    #fecha seleccionada
     fecha_ini = request.POST.get("fecha_ini")
-    #fecha_fin = request.POST.get("fecha_fin")
-    #Maquinas
-         
-    #Si hay una fecha seleccionada
+    #Maquinas seleccionadas
+    maquinas = device(request)
+    device_new = maquinas[0]
+    device_str = maquinas[1]
+    
+    #Si hay una fecha seleccionada valida
     if fecha_ini != None: 
-        #Filtrar ID seleccioandos y convertilos a Int
-        maquinas = device(request)
-        device_new = maquinas[0]
-        device_str = maquinas[1]
         #Contenedores
         horas = []
         cont = []
@@ -478,7 +430,7 @@ def horas(request):
         #conversión de fecha
         fecha_ini_ = datetime.datetime.strptime(fecha_ini, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
         fecha_fin_ = datetime.datetime.strptime(fecha_ini, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=0)
-
+        
         #Generar lista con los intervalos de tiempo en horas
         copia_fecha_ini_ = fecha_ini_
         while(copia_fecha_ini_<fecha_fin_):
@@ -503,33 +455,111 @@ def horas(request):
 
         context = {
             'querys' : dic,
-            'device' : device_str
-        }
+            'device' : device_str}
+        
     else:
-        context = {
-            
-        }
+        context = {}
+        
     return render(request, 'informes/horas.html', context)
 
 def maximos(request): 
-    
     #Valores seleccionados en el front para el filtro
     chk = request.POST.get("seleccion_rango")
     fecha_ini = request.POST.get("fechainicial")
     fecha_fin = request.POST.get("fechafinal")
     dia = request.POST.get("dia")
+    
     #función que devuelve los Id de las maquinas seleccionadas como String y Entero 
     maquinas = device(request)
     device_new = maquinas[0]
     device_str = maquinas[1]
     
-    #En caso de seleccionar filtro por rango de fecha 
+    #En caso de seleccionar filtro por rango de fecha, siempre y cuando sea una fecha valida
     if chk == "1" and fecha_ini != None and fecha_fin != None:
-        pass
-     
-    #En caso de seleccionar filtro por dia       
-    if chk == "2" and dia != None:
+        cont = []
+        dias = []
+        maximos = []
+        promedio = []
+        totales = []
+        dic = {}
+        print("prueba2")
+        #Rango de fechas para filtrar desde las 00:00:00 del dia inicial al 23:59:59 del dia final
+        fecha_ini_ = datetime.datetime.strptime(fecha_ini, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+        fecha_fin_ = datetime.datetime.strptime(fecha_fin, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=0)
         
+        #Generar lista con las fechas en intervalos de un dia entre fecha inicial y fecha final
+        copia_fecha_ini_ = fecha_ini_
+        while(copia_fecha_ini_ < fecha_fin_):
+            cont.append(copia_fecha_ini_)
+            copia_fecha_ini_ = copia_fecha_ini_ + datetime.timedelta(days=1)
+            cont.append(copia_fecha_ini_)
+            dias.append(cont)
+            cont = []
+        #print(dias)
+        #consultar datos en rango de fechas
+        querys = models.TbBilling.objects.filter(billingtransaciondate__range=(fecha_ini_,fecha_fin_)).values_list('id_device','billingtotal','billingtransaciondate', named = True)
+        
+        #filtrar informacion consultada por fecha y maquina
+        for dia in dias:              #Recorre el intervalo de horas
+            for dev in device_new:      #Recorre el numero de maquinas seleccionadas
+                total = 0               #Reinicia el acumulador
+                for query in querys:    #recorre el query
+                    #Siempre y cuando sea la maquina buscada dentro del tiempo establecido
+                    if query.id_device == dev and query.billingtransaciondate >= dia[0] and query.billingtransaciondate <= dia[1]:  
+                        total = total + query.billingtotal #acumula las ventas que se encuentren en el rango de fechas y la maquina iterada  
+                cont.append(total) #Agrega las ventas totales a un vector con que contiene las ventas de todas las maquinas consultada para un rango de tiempo
+            totales.append(cont)
+            dic[dia[0]] = cont #se relaciona el vector cont con el intervalo de tiempo correspondiente
+            cont = []
+        #print(dic)
+        num_device = (len(device_new)) #Cantidad de maquinas consultadas
+        
+        #vectores vacios que contendran las estadisticas
+        vector_maximos = [0]*num_device
+        vector_fechas = [0]*num_device
+        vector_sumatoria = [0]*num_device
+        vector_contandor = [0]*num_device
+        vector_promedio = [0]*num_device
+   
+        for x in dic:
+            for y in range(num_device):
+                #acumulador del total vendido de cada maquina                
+                vector_sumatoria[y] = vector_sumatoria[y] + dic[x][y]
+                #acumulador de numero de ventas 
+                if dic[x][y] != 0:
+                    vector_contandor[y] = vector_contandor[y] + 1 
+                #acumulador con la mayor venta por maquina en rango de fecha
+                if dic[x][y] > vector_maximos[y]:                                                                                                      
+                    vector_fechas[y] = x
+                    vector_maximos[y] = dic[x][y] 
+        #Calcular el promedio de ventas
+        for i in range(num_device):
+            if vector_contandor[i] != 0:
+                vector_promedio[i] = round((vector_sumatoria[i]/vector_contandor[i]),2)
+            else: 
+                vector_promedio[i] = 0
+        
+        #lista de listas con datos de ventas maximas y promedio       
+        maximos.append(vector_fechas)
+        maximos.append(vector_maximos)
+        promedio.append(vector_fechas)
+        promedio.append(vector_promedio)
+        
+        context = {
+            'querys'   :  dic,
+            'device'   :  device_str,
+            'maximos'  :  maximos,
+            'promedio' :  promedio,
+            'total'    :  vector_sumatoria,
+            'condicion':  1,
+            'rango'    :  "DIAS" 
+        }
+        
+     
+    #En caso de seleccionar filtro por dia, siempre y cuando sea una fecha valida
+    elif chk == "2" and dia != None:
+        maximos = []
+        promedio = []
         horas = []
         dic = {}
         cont = []
@@ -538,7 +568,8 @@ def maximos(request):
         #rango de fecha desde las 00:00:00 hasta las 23:59:59
         fecha_ini_ = datetime.datetime.strptime(dia, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
         fecha_fin_ = datetime.datetime.strptime(dia, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=0)
-        
+        print("hora:")
+        print(type(fecha_fin_.hour))
         #Generar lista con los intervalos de tiempo en horas
         copia_fecha_ini_ = fecha_ini_
         while(copia_fecha_ini_<fecha_fin_):
@@ -550,8 +581,8 @@ def maximos(request):
         
         #Consulta con los datos de la tabla de ventas en el rango de fecha seleccionado  
         querys = models.TbBilling.objects.filter(billingtransaciondate__range=(fecha_ini_,fecha_fin_)).values_list('id_device','billingtotal','billingtransaciondate', named = True)
-        
-        for hora in horas:              #Recorre el intervalo de fechas 
+        #Filtro de datos en base al query
+        for hora in horas:              #Recorre el intervalo de horas
             for dev in device_new:      #Recorre el numero de maquinas seleccionadas
                 total = 0               #Reinicia el acumulador
                 for query in querys:    #recorre el query
@@ -560,7 +591,11 @@ def maximos(request):
                         total = total + query.billingtotal #acumula las ventas que se encuentren en el rango de fechas y la maquina iterada  
                 cont.append(total) #Agrega las ventas totales a un vector con que contiene las ventas de todas las maquinas consultada para un rango de tiempo
             totales.append(cont)
-            dic[hora[1]] = cont #se relaciona el vector cont con el intervalo de tiempo correspondiente
+            if hora[1].hour < 10 and hora[1] != 0:
+                hour = "0"+str(hora[1].hour)+":0"+str(hora[1].minute)+":0"+str(hora[1].second)
+            else:
+                hour = str(hora[1].hour)+":0"+str(hora[1].minute)+":0"+str(hora[1].second)
+            dic[hour] = cont #se relaciona el vector cont con el intervalo de tiempo correspondiente
             cont = []
         
         num_device = (len(device_new)) #Cantidad de maquinas consultadas
@@ -571,46 +606,41 @@ def maximos(request):
         vector_sumatoria = [0]*num_device
         vector_contandor = [0]*num_device
         vector_promedio = [0]*num_device
-               
+   
         for x in dic:
             for y in range(num_device):
                 #acumulador del total vendido de cada maquina                
                 vector_sumatoria[y] = vector_sumatoria[y] + dic[x][y]
-                
+                #acumulador de numero de ventas 
                 if dic[x][y] != 0:
                     vector_contandor[y] = vector_contandor[y] + 1 
-                
-                
+                #acumulador con la mayor venta por maquina en rango de fecha
                 if dic[x][y] > vector_maximos[y]:                                                                                                      
                     vector_fechas[y] = x
                     vector_maximos[y] = dic[x][y] 
-                    
-        print(vector_sumatoria)
-        print(vector_contandor)
-    
+        #Calcular el promedio de ventas
         for i in range(num_device):
             if vector_contandor[i] != 0:
                 vector_promedio[i] = round((vector_sumatoria[i]/vector_contandor[i]),2)
             else: 
                 vector_promedio[i] = 0
         
-        maximos = []
+        #lista de listas con datos de ventas maximas y promedio       
         maximos.append(vector_fechas)
         maximos.append(vector_maximos)
-        
-        promedio = []
-        promedio.append(vector_fechas)
+        #promedio.append(vector_fechas)
         promedio.append(vector_promedio)
         
         context = {
-            'querys' : dic,
-            'device' : device_str,
-            'maximos' : maximos,
-            'promedio' : promedio,
-            'total': vector_sumatoria,
-            'condicion': 1
+            'querys'   :  dic,
+            'device'   :  device_str,
+            'maximos'  :  maximos,
+            'promedio' :  promedio,
+            'total'    :  vector_sumatoria,
+            'condicion':  1,
+            'rango'    :  "HORA" 
         }
-        
+    #En caso de no seleccionarse una fecha valida  
     else:
         context = {
             'condicion': 0,
@@ -620,6 +650,11 @@ def maximos(request):
 
 #Validación de los checkbox seleccionados 
 def device(request):
+    #contenedores
+    device_new = []
+    device_str = []
+    device_full = []
+    #Consulta el estado de los Check Box
     device = [
         request.POST.get("cbox1"), request.POST.get("cbox2"), request.POST.get("cbox3"),
         request.POST.get("cbox4"), request.POST.get("cbox5"), request.POST.get("cbox6"),
@@ -628,20 +663,37 @@ def device(request):
         request.POST.get("cbox13"), request.POST.get("cbox14"), request.POST.get("cbox15"),
         request.POST.get("cbox16"), request.POST.get("cbox17"), request.POST.get("cbox18"),
         request.POST.get("cbox19"), request.POST.get("cbox20"), request.POST.get("cbox21"),]
-
-    device_new = []
-    device_str = []
-    device_full = []
-    
+    #Filtrar maquinas seleccionadas y convertir a Int y Str
     for dev in device:
         if dev != None:
             device_new.append(int(dev))
             device_str.append("PET0"+dev)
-            
+    #Agregar a la informacion de selección a una lsita de lista 
     device_full.append(device_new)
-    
     device_full.append(device_str)
     
     return (device_full)
+
+def pdf(request):
+    template = get_template('informes/ventas.html')
+    html = template.render(context1)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reporte_ventas.pdf"'
+    
+    pisa_status = pisa.CreatePDF(
+       html, dest=response)
+    
+    return response
+
+def pdf2(request):
+    template = get_template('informes/maquinas.html')
+    html = template.render(context2)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="reporte_maquinas.pdf"'
+    
+    pisa_status = pisa.CreatePDF(
+       html, dest=response)
+    
+    return response
     
     
