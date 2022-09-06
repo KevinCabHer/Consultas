@@ -7,11 +7,8 @@
 <hr/>
 <form action = "/horas/" method="POST">
     {% csrf_token %}
-    <label for="fecha_ini">Desde: </label>
+    <label for="fecha_ini">Seleccione el día: </label>
     <input name="fecha_ini" id="fecha_ini" type="date"></input>
-
-    <label for="fecha_fin">Hasta: </label>
-    <input name="fecha_fin" id="fecha_fin" type="date"></inpu>
     <hr/>
     <div style = "display: flex; justify-content: center;">
     <scroll-container style ="display:block; width:200px; height:200px; overflow-y:scroll; scroll-behavior:smooth;">
@@ -81,5 +78,10 @@
         </div>
     </div>
 <hr/>
+<h2>Grafico de Ventas</h2>
+<hr/>
+<div>
+    <div id="horas" style="width: 1200px; height: 600px;"></div>
+</div>
 
 {% endblock  %}

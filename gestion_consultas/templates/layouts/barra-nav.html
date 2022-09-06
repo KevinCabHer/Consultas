@@ -1,13 +1,14 @@
 {% load static %}
-<nav>
+<nav class="navbar fixed-top">
         <ul>
-            <li><a href = "{% url 'inicio' %}"> Inicio </a><li> 
-            <li><a href = "{% url 'informes' %}"> Productos </a><li>
-            <li><a href = "{% url 'ventas' %}"> Ventas </a><li>
-            <li><a href = "{% url 'maquinas' %}"> Maquinas </a><li>
-            <li><a href = "{% url 'comparacion' %}"> Comparacion </a><li>
-            <li><a href = "{% url 'horas' %}">Horas<a/><li>
-            <li><a href = "{% url 'about' %}">Acerca De</a><li>
+            <li><a  href = "{% url 'inicio' %}"> Inicio </a><li>
+            <li><a  href = "{% url 'informes' %}"> Productos </a><li>
+            <li><a  href = "{% url 'ventas' %}"> Ventas </a><li>
+            <li><a  href = "{% url 'maquinas' %}"> Maquinas </a><li>
+            <li><a  href = "{% url 'comparacion' %}"> Comparacion </a><li>
+            <li><a  href = "{% url 'horas' %}"> Horas <a/><li>
+            <li><a  href = "{% url 'about' %}"> Acerca De </a><li>
+            <!--<img class=titulo src="{% static '/img/prueba.PNG' %}" alt="My image">-->
         </ul>
-    <img class=titulo src="{% static '/img/prueba.PNG' %}" alt="My image">
+
 </nav>

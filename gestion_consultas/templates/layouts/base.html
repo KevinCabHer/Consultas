@@ -91,6 +91,31 @@
       }
     </script>
 
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+
+        var data = google.visualization.arrayToDataTable([
+          
+          ['Horas', {% for maquina in device %} '{{ maquina }}', {% endfor %} ],
+          {% for key, value in querys.items %}
+          ['{{ key }}',     {% for val1 in value %} {{ val1 }}, {% endfor %} ], 
+          {% endfor %}         
+        ]);
+
+        var options = {
+          title: '',
+          curveType: 'function',
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('horas'));
+
+        chart.draw(data, options);
+      }
+    </script>
+
     
     
     
@@ -106,7 +131,7 @@
 </head>
 <body>
     {% include 'layouts/barra-nav.html' %}
-    <main>
+    <main style = "padding-top: 120px;">
         {% block 'content' %}
         {% endblock  %}
     </main>

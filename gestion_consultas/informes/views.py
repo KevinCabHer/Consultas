@@ -29,7 +29,6 @@ context2 = {}
 def informes(request):
     tabla = models.TbProduct.objects.all().values_list('id_product', 'productname', 'id_category', 'productprice', named = True)
     context = {'tabla' : tabla}   
-    print(tabla)
     return render(request, 'informes/index.html',context)
     
 def inicio(request):
@@ -459,10 +458,10 @@ def comparacion(request):
 
 def horas(request):
     
-    #Criterios de busqueda
+    #Criterios de busqueda seleccionados en el HTML
     #Fechas
     fecha_ini = request.POST.get("fecha_ini")
-    fecha_fin = request.POST.get("fecha_fin")
+    #fecha_fin = request.POST.get("fecha_fin")
     #Maquinas
     device = [
         request.POST.get("cbox1"), request.POST.get("cbox2"), request.POST.get("cbox3"),
@@ -472,51 +471,48 @@ def horas(request):
         request.POST.get("cbox13"), request.POST.get("cbox14"), request.POST.get("cbox15"),
         request.POST.get("cbox16"), request.POST.get("cbox17"), request.POST.get("cbox18"),
         request.POST.get("cbox19"), request.POST.get("cbox20"), request.POST.get("cbox21"),]
-    
-    #Filtrar ID seleccioandos y convertilos a String
-    device_new = []
-    device_str = []
-    for dev in device:
-        if dev != None:
-            device_new.append(str(dev))
-            device_str.append("PET0"+dev)
-            
-    #Si hay una nfecha seleccionada
-    if fecha_fin != None and fecha_ini != None: 
+         
+    #Si hay una fecha seleccionada
+    if fecha_ini != None: 
+        #Filtrar ID seleccioandos y convertilos a Int
+        device_new = []
+        device_str = []
+        for dev in device:
+            if dev != None:
+                device_new.append(int(dev))
+                device_str.append("PET0"+dev)
         #Contenedores
         horas = []
         cont = []
         dic = {}      
         #conversión de fecha
         fecha_ini_ = datetime.datetime.strptime(fecha_ini, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
-        fecha_fin_ = datetime.datetime.strptime(fecha_fin, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=0)
+        fecha_fin_ = datetime.datetime.strptime(fecha_ini, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=0)
 
-        copia_fecha_fin_ = fecha_fin_
+        #Generar lista con los intervalos de tiempo en horas
         copia_fecha_ini_ = fecha_ini_
-        
         while(copia_fecha_ini_<fecha_fin_):
             cont.append(copia_fecha_ini_)
             copia_fecha_ini_ = copia_fecha_ini_ + datetime.timedelta(hours=1)
             cont.append(copia_fecha_ini_)
             horas.append(cont)
             cont = []
-        cont = []
-        totales = []              
-        #print(horas)
     
-        querys = models.TbBilling.objects.filter(id_device = 1, billingtransaciondate__range=(fecha_ini_,fecha_fin_)).values_list('id_device','billingtotal','billingtransaciondate', named = True).order_by('billingtransaciondate')
+        querys = models.TbBilling.objects.filter(billingtransaciondate__range=(fecha_ini_,fecha_fin_)).values_list('id_device','billingtotal','billingtransaciondate', named = True)
         
-        for hora in horas:
-            total = 0
-            for query in querys:
-                if query.billingtransaciondate >= hora[0] and query.billingtransaciondate <= hora [1]:
-                    total = total + query.billingtotal
-            dic[hora[0]] = total       
-           
-        print(dic)
-              
+        for hora in horas: #Recorre el intervalo de fechas 
+            for dev in device_new: #Recorre el numero de maquinas
+                total = 0
+                for query in querys: #recorre el query
+                    #Siempre y cuando sea la maquina buscada dentro del tiempo establecido
+                    if query.id_device == dev and query.billingtransaciondate >= hora[0] and query.billingtransaciondate <= hora [1]: #si 
+                        total = total + query.billingtotal  
+                cont.append(total) #
+            dic[hora[0]] = cont
+            cont = []
+
         context = {
-            #'querys' : '',
+            'querys' : dic,
             'device' : device_str
         }
     else:

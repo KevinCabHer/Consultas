@@ -17,6 +17,11 @@
 h1,h2,h3,h4,h5{
     font-family: var(--font-main); 
 }
+main {
+    margin: 0;
+	padding: 0;
+	padding-top: 120px;
+}
 
 nav {
     display: flex;
