@@ -64,7 +64,7 @@
 </form>
 {% if condicion == 1 %}
 <hr/>
-<h3>MAXIMAS VENTAS POR {{rango}}</h3>
+<h3>{{rango}} CON MAYOR VENTA</h3>
 <hr/>
     <div class = "container">
         <div class = "row">
@@ -76,7 +76,7 @@
                                 <thead class = "table-dark " > 
                                     <tr>
                                         {% for dev in device %}
-                                        <th>{{dev}}</th>
+                                        <th style = "Color: white;">{{dev}}</th>
                                         {% endfor %}
                                     </tr>        
                                 </thead>
@@ -109,7 +109,7 @@
                                 <thead class = "table-dark " > 
                                     <tr>
                                         {% for dev in device %}
-                                        <th>{{dev}}</th>
+                                        <th style = "Color: white;">{{dev}}</th>
                                         {% endfor %}
                                     </tr>        
                                 </thead>
@@ -141,9 +141,9 @@
                             <table class = "table table-hover table-bordered" id = "tablafacturas">
                                 <thead class = "table-dark " > 
                                     <tr>
-                                        <th>{{rango}}}</th>
+                                        <th style = "Color: white;">{{rango}}</th>
                                         {% for dev in device %}
-                                        <th>{{dev}}</th>
+                                        <th style = "Color: white;">{{dev}}</th>
                                         {% endfor %}
                                         
                                     </tr>        
@@ -158,9 +158,9 @@
                                     </tr> 
                                     {% endfor %}
                                     <tr class = "table-dark" > 
-                                      <td>TOTAL</td>
+                                      <td style = "Color: white;">TOTAL</td>
                                       {% for t in total %}
-                                      <td>{{ t }}</td>
+                                      <td style = "Color: white;">{{ t }}</td>
                                       {% endfor %}  
                                     </tr>
                                 </tbody>            

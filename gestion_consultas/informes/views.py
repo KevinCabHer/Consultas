@@ -32,10 +32,10 @@ def inicio(request):
 def about(request):   
     return render(request, 'informes/about.html',{})
 
-def informes(request):
+def productos(request):
     tabla = models.TbProduct.objects.all().values_list('id_product', 'productname', 'id_category', 'productprice', named = True)
     context = {'tabla' : tabla}   
-    return render(request, 'informes/index.html',context)
+    return render(request, 'informes/productos.html',context)
 
 def ventas(request):
     total  =    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] #esto se puede mejorar
@@ -47,7 +47,7 @@ def ventas(request):
     
     date_range = request.POST.get('fecha')    
     #esto se puede mejorar
-    if date_range != None:
+    if date_range != "default" and date_range != None:
         
         start_date = datetime.date.today()
         end_date = datetime.date.today()
@@ -74,7 +74,7 @@ def ventas(request):
         
         for dev in device:
             #consulta ventas por id de maquina en un rango de fecha        
-            query = models.TbBilling.objects.filter(id_device=dev, billingtransaciondate__range=(start_date, end_date)).select_related()
+            query = models.TbBilling.objects.filter(billingtransaciondate__range=(start_date, end_date)).select_related()
             cant[cont] = query.count() #cantidad de ventas por maquina
             #total venta por id de 
             for query in query:
@@ -89,51 +89,57 @@ def ventas(request):
         for j in cant:
             placas_total = j + placas_total
             
-    global context1  #variable global para generar pdf
-      
-    context1 = {
-        'venta1':cant[0],
-        'total1':total[0],
-        'venta2':cant[1],
-        'total2':total[1],
-        'venta3':cant[2],
-        'total3':total[2],
-        'venta4':cant[3],
-        'total4':total[3],
-        'venta5':cant[4],
-        'total5':total[4],
-        'venta6':cant[5],
-        'total6':total[5],
-        'venta7':cant[6],
-        'total7':total[6],
-        'venta8':cant[7],
-        'total8':total[7],
-        'venta9':cant[8],
-        'total9':total[8],
-        'venta10':cant[9],
-        'total10':total[9],
-        'venta11':cant[10],
-        'total11':total[10],
-        'venta12':cant[11],
-        'total12':total[11],
-        'venta13':cant[12],
-        'total13':total[12],
-        'venta14':cant[13],
-        'total14':total[13],
-        'venta15':cant[14],
-        'total15':total[14],
-        'venta16':cant[15],
-        'total16':total[15],
-        'venta17':cant[16],
-        'total17':total[16],
-        'venta18':cant[17],
-        'total18':total[17],
-        'venta19':cant[18],
-        'total19':total[18],
-        'Total':gran_total,
-        'placas': placas_total,}
+    #global context1  #variable global para generar pdf
+
+        context = {
+            'venta1':cant[0],
+            'total1':total[0],
+            'venta2':cant[1],
+            'total2':total[1],
+            'venta3':cant[2],
+            'total3':total[2],
+            'venta4':cant[3],
+            'total4':total[3],
+            'venta5':cant[4],
+            'total5':total[4],
+            'venta6':cant[5],
+            'total6':total[5],
+            'venta7':cant[6],
+            'total7':total[6],
+            'venta8':cant[7],
+            'total8':total[7],
+            'venta9':cant[8],
+            'total9':total[8],
+            'venta10':cant[9],
+            'total10':total[9],
+            'venta11':cant[10],
+            'total11':total[10],
+            'venta12':cant[11],
+            'total12':total[11],
+            'venta13':cant[12],
+            'total13':total[12],
+            'venta14':cant[13],
+            'total14':total[13],
+            'venta15':cant[14],
+            'total15':total[14],
+            'venta16':cant[15],
+            'total16':total[15],
+            'venta17':cant[16],
+            'total17':total[16],
+            'venta18':cant[17],
+            'total18':total[17],
+            'venta19':cant[18],
+            'total19':total[18],
+            'Total':gran_total,
+            'placas': placas_total,
+            'estado': 1}
     
-    return render(request, 'informes/ventas.html',context1)
+    else:
+        context = {
+           'estado': 0, 
+        }
+    print (date_range)
+    return render(request, 'informes/ventas.html',context)
 
 def maquinas(request):
     lista_fechas = []
@@ -475,7 +481,7 @@ def maximos(request):
     device_str = maquinas[1]
     
     #En caso de seleccionar filtro por rango de fecha, siempre y cuando sea una fecha valida
-    if chk == "1" and fecha_ini != None and fecha_fin != None:
+    if chk == "1" and fecha_ini != "" and fecha_fin != "":
         cont = []
         dias = []
         maximos = []
@@ -542,7 +548,7 @@ def maximos(request):
         #lista de listas con datos de ventas maximas y promedio       
         maximos.append(vector_fechas)
         maximos.append(vector_maximos)
-        promedio.append(vector_fechas)
+        #promedio.append(vector_fechas)
         promedio.append(vector_promedio)
         
         context = {
@@ -557,7 +563,7 @@ def maximos(request):
         
      
     #En caso de seleccionar filtro por dia, siempre y cuando sea una fecha valida
-    elif chk == "2" and dia != None:
+    elif chk == "2" and dia != "":
         maximos = []
         promedio = []
         horas = []

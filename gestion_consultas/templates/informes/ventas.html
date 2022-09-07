@@ -21,18 +21,14 @@
             <input name="fechainicial" id="fechainicial" autocomplete="off" type="date"></input>
             <label for="fechafinal">Hasta: </label>
             <input name="fechafinal" id="fechafinal" autocomplete="off" type="date" ></input>
-        
+            <div style = "display: flex; justify-content: center; align-items: center; spacing: 20px; padding: 50px;" >
             <button class = "btn btn-success" style="background-color:rgb(0,0,85)" >Filtrar</button>
+            </div>
         </div>
-    </form>
-    <hr/>
-    <form class= "form1" action="/pdf/" method="POST">
-        {% csrf_token %}
-        <button class = "btn btn-success" style="background-color:rgb(0,0,85)"> Generar PDF </button>
-    </form>
-    <hr/>
+    </form>    
 </div>
 <hr/>
+{% if estado == 1 %}
 <div class = "container">
     <div class = "row">
         <div class = "cold-md-4.offset-md-4">
@@ -163,5 +159,5 @@
 <div>
     <div id="piechart" style="width: 900px; height: 600px;"></div>
 </div>
-
+{% endif %}
 {% endblock  %}
