@@ -38,12 +38,12 @@ def productos(request):
     return render(request, 'informes/productos.html',context)
 
 def ventas(request):
-    total  =    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] #esto se puede mejorar
-    cant   =    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]  #esto se puede mejorar
-    device =    ['1','2','3','4','5','6','7','8','9','10','11','17','18','19','20','21','22','23','24']#id maquinas  #esto se puede mejorar
-    cont   = 0
-    gran_total = 0
-    placas_total = 0
+    
+    device =    []#id maquinas  #esto se puede mejorar
+    vector_total = []
+    vector_gran_total = []
+    placas = 0
+    total = 0
     
     date_range = request.POST.get('fecha')    
     #esto se puede mejorar
@@ -65,73 +65,43 @@ def ventas(request):
             end_date = datetime.date.today()
             
         if date_range == "mes":
-            start_date = datetime.date.today()-datetime.timedelta(days=7)
+            start_date = datetime.date.today()-datetime.timedelta(days=30)
             end_date = datetime.date.today()
             
         if date_range == "rango":
             start_date = request.POST.get('fechainicial')
             end_date = request.POST.get('fechafinal')
         
+        
+        querys = models.TbBilling.objects.filter(billingtransaciondate__range=(start_date, end_date)).values_list('id_device', 'billingtransaciondate', 'billingtotal', named = True)
+        #######################
+        device1 = models.TbDevice.objects.select_related('id_devizezone').all()
+        for dev1 in device1:
+            print(dev1.id_device )
+            print(dev1.id_devizezone.devicezonename)
+        #########################
+        #recorre las id de las maquinas
         for dev in device:
-            #consulta ventas por id de maquina en un rango de fecha        
-            query = models.TbBilling.objects.filter(billingtransaciondate__range=(start_date, end_date)).select_related()
-            cant[cont] = query.count() #cantidad de ventas por maquina
-            #total venta por id de 
-            for query in query:
-                total[cont] = query.billingtotal + total[cont]
-            
-            cont = cont + 1
-        # total dinero 
-        for i in total:
-            gran_total = i + gran_total
-            
-        #total placas vendidas
-        for j in cant:
-            placas_total = j + placas_total
-            
-    #global context1  #variable global para generar pdf
-
+            #recorre el query en busca de las ventas segun id maquina       
+            for query in querys:
+                if query.id_device == int(dev):
+                    #sumatoria de ventas de la maquina
+                    total = query.billingtotal + total
+                    #cantidad de placas vendidas
+                    placas = placas + 1
+            #agregando a lista con columnas: id maquina - placas vendidas - total vendido 
+            vector_total.append(dev)
+            vector_total.append(placas)
+            vector_total.append(total)
+            #agregando a lista de lista
+            vector_gran_total.append(vector_total)
+            #reiniciar acumuladores
+            vector_total = []
+            total = 0
+            placas = 0
+        #print(device1)
+        #print(vector_gran_total)
         context = {
-            'venta1':cant[0],
-            'total1':total[0],
-            'venta2':cant[1],
-            'total2':total[1],
-            'venta3':cant[2],
-            'total3':total[2],
-            'venta4':cant[3],
-            'total4':total[3],
-            'venta5':cant[4],
-            'total5':total[4],
-            'venta6':cant[5],
-            'total6':total[5],
-            'venta7':cant[6],
-            'total7':total[6],
-            'venta8':cant[7],
-            'total8':total[7],
-            'venta9':cant[8],
-            'total9':total[8],
-            'venta10':cant[9],
-            'total10':total[9],
-            'venta11':cant[10],
-            'total11':total[10],
-            'venta12':cant[11],
-            'total12':total[11],
-            'venta13':cant[12],
-            'total13':total[12],
-            'venta14':cant[13],
-            'total14':total[13],
-            'venta15':cant[14],
-            'total15':total[14],
-            'venta16':cant[15],
-            'total16':total[15],
-            'venta17':cant[16],
-            'total17':total[16],
-            'venta18':cant[17],
-            'total18':total[17],
-            'venta19':cant[18],
-            'total19':total[18],
-            'Total':gran_total,
-            'placas': placas_total,
             'estado': 1}
     
     else:
