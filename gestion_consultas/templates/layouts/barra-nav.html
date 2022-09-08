@@ -1,14 +1,18 @@
 {% load static %}
 <nav class="navbar fixed-top">
-        <ul>
-            <li><a  href = "{% url 'inicio' %}"> Inicio </a><li>
-            <li><a  href = "{% url 'productos' %}"> Productos </a><li>
-            <li><a  href = "{% url 'ventas' %}"> Ventas </a><li>
-            <li><a  href = "{% url 'maquinas' %}"> Máquinas </a><li>
-            <li><a  href = "{% url 'comparacion' %}"> Comparación </a><li>
-            <li><a  href = "{% url 'maximos' %}"> Máximos </a><li>
-            <li><a  href = "{% url 'placas' %}"> Placas </a><li>
-            <li><a  href = "{% url 'about' %}"> Acerca De </a><li>
+        <ul class = "menu">
+            <li><a  href = "{% url 'inicio' %}"> Inicio </a></li>
+            <li><a  href = "{% url 'productos' %}"> Productos </a></li>
+            <li><a  href = "#"> Reportes </a> 
+                <ul class = "submenu">  
+                    <li><a  href = "{% url 'ventas' %}"> Ventas </a></li>
+                    <li><a  href = "{% url 'maquinas' %}"> Máquinas </a></li>
+                    <li><a  href = "{% url 'comparacion' %}"> Comparación </a></li>
+                    <li><a  href = "{% url 'maximos' %}"> Máximos </a></li>
+                    <li><a  href = "{% url 'placas' %}"> Placas </a></li>
+                </ul>
+            </li> 
+           
             <!--<img class=titulo src="{% static '/img/prueba.PNG' %}" alt="My image">-->
         </ul>
 </nav>
