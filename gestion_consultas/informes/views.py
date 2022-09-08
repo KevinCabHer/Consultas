@@ -33,20 +33,25 @@ def about(request):
     return render(request, 'informes/about.html',{})
 
 def productos(request):
+    #Consulta los productos disponibles
     tabla = models.TbProduct.objects.all().values_list('id_product', 'productname', 'id_category', 'productprice', named = True)
     context = {'tabla' : tabla}   
     return render(request, 'informes/productos.html',context)
 
 def ventas(request):
     
-    device =    []#id maquinas  #esto se puede mejorar
+    #contenedores
+    device =    []
     vector_total = []
     vector_gran_total = []
+    name_zona = []
+    name_maquina = []
     placas = 0
     total = 0
-    
+    acum = 0
+    #Rango fecha seleccionada por el usuario
     date_range = request.POST.get('fecha')    
-    #esto se puede mejorar
+    
     if date_range != "default" and date_range != None:
         
         start_date = datetime.date.today()
@@ -55,42 +60,38 @@ def ventas(request):
         if date_range == "hoy":
             start_date = datetime.date.today()
             end_date = datetime.date.today()+datetime.timedelta(days=1)
-
         if date_range == "ayer":
             start_date = datetime.date.today()-datetime.timedelta(days=1)
             end_date = datetime.date.today()
-
         if date_range == "semana":
             start_date = datetime.date.today()-datetime.timedelta(days=7)
             end_date = datetime.date.today()
-            
         if date_range == "mes":
             start_date = datetime.date.today()-datetime.timedelta(days=30)
             end_date = datetime.date.today()
-            
         if date_range == "rango":
             start_date = request.POST.get('fechainicial')
             end_date = request.POST.get('fechafinal')
         
         
-        querys = models.TbBilling.objects.filter(billingtransaciondate__range=(start_date, end_date)).values_list('id_device', 'billingtransaciondate', 'billingtotal', named = True)
-        #######################
-        device1 = models.TbDevice.objects.select_related('id_devizezone').all()
-        for dev1 in device1:
-            print(dev1.id_device )
-            print(dev1.id_devizezone.devicezonename)
-        #########################
-        #recorre las id de las maquinas
+        querys = models.TbBilling.objects.filter(billingtransaciondate__range=(start_date, end_date)).values_list('id_device', 'billingtransaciondate', 'billingtotal', named = True).order_by('id_device')
+        devices = models.TbDevice.objects.select_related('id_devizezone').all()
+        for dev in devices:
+            device.append(dev.id_device)
+            name_maquina.append(dev.devicename)
+            name_zona.append(dev.id_devizezone.devicezonename)
+            
         for dev in device:
-            #recorre el query en busca de las ventas segun id maquina       
+            #recorre el query en busca de las ventas segun id maquina           
             for query in querys:
-                if query.id_device == int(dev):
+                if str(query.id_device) == str(dev):
                     #sumatoria de ventas de la maquina
                     total = query.billingtotal + total
                     #cantidad de placas vendidas
                     placas = placas + 1
-            #agregando a lista con columnas: id maquina - placas vendidas - total vendido 
-            vector_total.append(dev)
+            #agregando a lista con columnas: nombre zona - nombre maquina - placas vendidas - total vendido
+            vector_total.append(name_zona[acum]) 
+            vector_total.append(name_maquina[acum])
             vector_total.append(placas)
             vector_total.append(total)
             #agregando a lista de lista
@@ -99,9 +100,11 @@ def ventas(request):
             vector_total = []
             total = 0
             placas = 0
+            acum = acum + 1
         #print(device1)
-        #print(vector_gran_total)
+        print(vector_gran_total)
         context = {
+            'gran_total':vector_gran_total,
             'estado': 1}
     
     else:
@@ -129,16 +132,13 @@ def maquinas(request):
     
     if start_date != None and end_date != None and select_zona != None:
         start_date2 = datetime.datetime.strptime(start_date, '%Y-%m-%d')
-        end_date2 = datetime.datetime.strptime(end_date, '%Y-%m-%d') + datetime.timedelta(days=1)
+        end_date2 = datetime.datetime.strptime
+        (end_date, '%Y-%m-%d') + datetime.timedelta(days=1)
         #busqueda de las ventas que coinciden con el id de la maquina y la fecha establecida
         querys = models.TbBilling.objects.filter(id_device=id_maquina, billingtransaciondate__range=(start_date2, end_date2)).select_related()
         #querys = []
         for query in querys:
             total = query.billingtotal + total
-        
-    #busqueda de las ventas diarias de la maquina
-    ##creacion fechas diarias
-    #if start_date != None and end_date != None:
         
         conv_fecha_ini = datetime.datetime.strptime(start_date, '%Y-%m-%d')
         conv_fecha_fin = datetime.datetime.strptime(end_date, '%Y-%m-%d') + datetime.timedelta(days=1)
@@ -451,7 +451,7 @@ def maximos(request):
     device_str = maquinas[1]
     
     #En caso de seleccionar filtro por rango de fecha, siempre y cuando sea una fecha valida
-    if chk == "1" and fecha_ini != "" and fecha_fin != "":
+    if chk == "1" and fecha_ini != "" and fecha_fin != "" and len(device_new) != 0:
         cont = []
         dias = []
         maximos = []
@@ -530,10 +530,9 @@ def maximos(request):
             'condicion':  1,
             'rango'    :  "DIAS" 
         }
-        
-     
+            
     #En caso de seleccionar filtro por dia, siempre y cuando sea una fecha valida
-    elif chk == "2" and dia != "":
+    elif chk == "2" and dia != "" and len(device_new) != 0:
         maximos = []
         promedio = []
         horas = []
@@ -624,6 +623,124 @@ def maximos(request):
     
     return render(request,'informes/maximos.html',context)
 
+def placas(request):
+    
+    #Valores seleccionados en el front para el filtro
+    chk = request.POST.get("seleccion_rango")
+    fecha_ini = request.POST.get("fechainicial")
+    fecha_fin = request.POST.get("fechafinal")
+    dia = request.POST.get("dia")
+    
+    #función que devuelve los Id de las maquinas seleccionadas como String y Entero 
+    maquinas = device(request)
+    device_new = maquinas[0]
+    device_str = maquinas[1]
+    
+    #en caso de seleccionar por rango de dias 
+    if chk == "2" and dia != "":
+        
+        dic = {}
+        
+        fecha_ini_ = datetime.datetime.strptime(dia, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+        fecha_fin_ = datetime.datetime.strptime(dia, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=0)
+        
+        query_detail  = models.TbBillingdetail.objects.select_related('id_product').filter(billinlinedate__range=(fecha_ini_,fecha_fin_))
+        
+        query_product = models.TbProduct.objects.all().values_list('id_product', 'productname', named = True )
+        
+        cont2 = 0
+        
+        for product in query_product:
+            cont = 0
+            #print("entre al for 1")
+            for detail in query_detail:
+                
+                if str(product.id_product) == str(detail.id_product):
+                    #print("entre al if")
+                    cont = cont + 1
+                    
+            if True: 
+                #print(cont) 
+                cont2 = cont2 + cont
+                if (product.productname) in dic:
+                    #print("entre")
+                    dic[(product.productname)] = dic.get(product.productname) + cont
+                else:
+                    dic[(product.productname)] = (cont)
+        #print(cont2)   
+        #print(dic)    
+        
+        menor = ([key for key, value in dic.items() if value == min(dic.values())]) 
+        mayor = ([key for key, value in dic.items() if value == max(dic.values())])     
+        
+        context = {
+            'rango' : "DIA",
+            'ventas' : dic,
+            'total' : cont2,
+            'prueba': "check1",
+            'estado': 1,
+            'menor': menor,
+            'mayor': mayor,
+            'fecha_ini': fecha_ini_,
+            'fecha_fin':fecha_fin_
+        }
+    
+    #en caso de seleccionar 
+    elif chk == "1" and fecha_fin != "" and fecha_ini != "":
+        print("entre")
+        dic = {}
+        
+        fecha_ini_ = datetime.datetime.strptime(fecha_ini, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+        fecha_fin_ = datetime.datetime.strptime(fecha_fin, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=0)
+        
+        query_detail  = models.TbBillingdetail.objects.select_related('id_product').filter(billinlinedate__range=(fecha_ini_,fecha_fin_))
+        
+        query_product = models.TbProduct.objects.all().values_list('id_product', 'productname', named = True )
+        
+        cont2 = 0
+        
+        for product in query_product:
+            cont = 0
+            #print("entre al for 1")
+            for detail in query_detail:
+                
+                if str(product.id_product) == str(detail.id_product):
+                    #print("entre al if")
+                    cont = cont + 1
+                    
+            if True: 
+                #print(cont) 
+                cont2 = cont2 + cont
+                if (product.productname) in dic:
+                    #print("entre")
+                    dic[(product.productname)] = dic.get(product.productname) + cont
+                else:
+                    dic[(product.productname)] = (cont)   
+        
+        menor = ([key for key, value in dic.items() if value == min(dic.values())]) 
+        mayor = ([key for key, value in dic.items() if value == max(dic.values())])
+        
+        
+        context = {
+            'rango' : "DIAS",
+            'ventas' : dic,
+            'total' : cont2,
+            'prueba': "check1",
+            'estado': 1,
+            'mayor': mayor,
+            'menor': menor,
+            'fecha_ini': fecha_ini_,
+            'fecha_fin':fecha_fin_
+            
+        }
+        
+    else:
+        
+        context = {
+            'estado': 0,
+        }
+    return render (request, 'informes/placas.html', context)
+
 #Validación de los checkbox seleccionados 
 def device(request):
     #contenedores
@@ -649,6 +766,7 @@ def device(request):
     device_full.append(device_str)
     
     return (device_full)
+
 
 def pdf(request):
     template = get_template('informes/ventas.html')

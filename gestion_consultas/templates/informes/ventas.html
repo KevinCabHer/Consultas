@@ -39,23 +39,25 @@
                             <thead class = "table-dark " style="background-color:rgb(0,0,85); color:black;" > 
                                 <tr style = "background-color:rgb(0,0,85); color:black;" >
                                     <th style = "Color: white;">Zona</th> 
-                                    <th styke = "color: white;">Id Maquina</th>   
+                                    <th styke = "color: white;">Maquina</th>   
                                     <th style = "Color: white;">Placas Vendidas</th>   
                                     <th style = "Color: white;">Total ventas</th>                                                       
                                 </tr>        
                             </thead>
                             <tbody>      
-                            
+                                {% for total in gran_total  %}
                                 <tr>
-                                    <td>Galerias</td>
-                                    <td>{{venta1}}</td>
-                                    <td>{{total1}}</td>
-                                </tr>                                          
-                                
+                                    {% for value in total %}
+                                    <td>{{value}}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                                                                            
                                 <tr class = "table-dark" >
                                     <td style = "Color: white;">Total</td>
-                                    <td style = "Color: white;">{{placas}}</td>
-                                    <td style = "Color: white;">{{Total}}</td>
+                                    <td style = "Color: white;">prueba</td>
+                                    <td style = "Color: white;">prueba</td>
+                                    <td style = "Color: white;">prueba</td>
                                 </tr> 
 
                             </tbody>            

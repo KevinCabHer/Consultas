@@ -107,3 +107,32 @@
     chart.draw(data, options);
   }
 </script>
+
+<!-- GRAFICO PLACAS -->
+
+<script type="text/javascript">
+  google.charts.load('current', {'packages':['bar']});
+  google.charts.setOnLoadCallback(drawChart);
+
+  function drawChart() {
+    var data = google.visualization.arrayToDataTable([
+      ['Producto', 'Cantidad'],
+      {% for key, value in ventas.items %}
+      ['{{key}}' , {{value}}],
+      {% endfor %}
+    ]);
+  
+   
+
+    var options = {
+      chart: {
+        title: '',
+      },
+      bars: 'horizontal' // Required for Material Bar Charts.
+    };
+
+    var chart = new google.charts.Bar(document.getElementById('placas'));
+
+    chart.draw(data, google.charts.Bar.convertOptions(options));
+  }
+</script>

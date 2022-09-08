@@ -54,6 +54,7 @@ class TbBilling(models.Model):
 
 class TbBillingdetail(models.Model):
     id_billingdetail = models.BigAutoField(db_column='Id_BillingDetail', primary_key=True)  # Field name made lowercase.
+    #id_billing = models.ForeignKey('TbBilling', models.DO_NOTHING,)
     id_billing = models.BigIntegerField(db_column='Id_Billing')  # Field name made lowercase.
     billinglinenumber = models.IntegerField(db_column='BillingLineNumber')  # Field name made lowercase.
     id_product = models.ForeignKey('TbProduct', models.DO_NOTHING, db_column='Id_Product')  # Field name made lowercase.
@@ -64,7 +65,7 @@ class TbBillingdetail(models.Model):
     billinlinedata = models.TextField(db_column='BillinLineData', blank=True, null=True)  # Field name made lowercase.
 
     def __str__(self):
-        return self.id_billingdetail
+        return str(self.id_billing)
     
     class Meta:
         managed = False
@@ -232,7 +233,7 @@ class TbProduct(models.Model):
     productdata = models.TextField(db_column='ProductData', blank=True, null=True)  # Field name made lowercase.
 
     def __str__(self):
-        return self.productname
+        return str(self.id_product)
     
     class Meta:
         managed = False

@@ -12,4 +12,5 @@ urlpatterns = [
    path('comparacion/', views.comparacion, name="comparacion"), 
    path('horas/', views.horas, name="horas"),
    path('maximos/', views.maximos, name="maximos"),
+   path('placas/', views.placas, name = "placas")
 ]
